@@ -62,7 +62,7 @@
           var that = this;
           return createElement('span', [
               createElement('span', node.label),
-              createElement('i', data.id),
+              // createElement('i', data.id),
               createElement('span', {attrs:{
                   style:"float: right; margin-right: 20px"
               }},[
@@ -126,22 +126,6 @@
     padding: 20px;
     .el-form-item__label{
       width: 120px;
-    }
-    .el-tree{
-      .el-tree-node__content i{
-        background-color: #8391a5;
-        display: inline-block;
-        padding: 0 5px;
-        height: 18px;
-        line-height: 18px;
-        font-size: 12px;
-        color: #fff;
-        border-radius: 4px;
-        box-sizing: border-box;
-        border: 1px solid transparent;
-        white-space: nowrap;
-        margin-left: 18px;
-      }
     }
   }
 </style>

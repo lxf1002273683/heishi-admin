@@ -1,5 +1,5 @@
 <template>
-    <el-menu mode="vertical" theme="dark" :default-active="$route.path">
+    <el-menu mode="vertical" theme="dark" :default-active="$route.path" unique-opened>
         <sidebar-item :routes='permission_routers'></sidebar-item>
     </el-menu>
 </template>

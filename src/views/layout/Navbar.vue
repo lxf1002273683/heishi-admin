@@ -12,7 +12,7 @@
             <el-dropdown-menu class="user-dropdown" slot="dropdown">
                 <router-link class='inlineBlock' to="/">
                     <el-dropdown-item>
-                        Home
+                        我的
                     </el-dropdown-item>
                 </router-link>
                 <el-dropdown-item divided><span @click="logout" class="logout" >退出</span></el-dropdown-item>

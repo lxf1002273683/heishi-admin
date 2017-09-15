@@ -5,8 +5,11 @@
           <el-menu-item index="1">用户列表</el-menu-item>
         </router-link>
         <el-menu-item index="2">创建用户</el-menu-item>
+        <router-link to="/admin/update_user">
+          <el-menu-item index="3">修改用户</el-menu-item>
+        </router-link>
         <router-link to="/admin/module_privilege">
-          <el-menu-item index="3">权限配置</el-menu-item>
+          <el-menu-item index="4">权限配置</el-menu-item>
         </router-link>
       </el-menu>
       <el-form autoComplete="on" ref="addForm" :model="addForm" label-width="80px" :rules="loginRules" class="addform">
@@ -17,8 +20,8 @@
               <el-input v-model="addForm.password" :type="type" autoComplete="on"></el-input>
               <span class="examine" @mousedown="onPasswordDown"  @mouseup="onPasswordUp">查看密码</span>
           </el-form-item>
-          <el-form-item label="商家ID" prop="user_id" v-if="addForm.role == 2 || addForm.role == 3">
-              <el-input v-model="addForm.user_id" autoComplete="on"></el-input>
+          <el-form-item label="商家ID" prop="hs_user_id" v-if="addForm.role == 2 || addForm.role == 3">
+              <el-input v-model="addForm.hs_user_id" autoComplete="on"></el-input>
           </el-form-item>
           <el-form-item label="角色" prop="role">
               <el-radio-group v-model="addForm.role">
@@ -61,13 +64,13 @@
           account: '',
           password: '',
           role: '',
-          user_id: ''
+          hs_user_id: ''
         },
         loginRules: {
           account: [{ required: true, trigger: 'blur' }],
           password: [{ required: true, validator: validatePass, trigger: 'blur' }],
           role: [{ required: true, validator: validateRes, trigger: 'blur' }],
-          user_id: [{ required: true, trigger: 'blur' }]
+          hs_user_id: [{ required: true, trigger: 'blur' }]
         },
         type: 'password'
       }
@@ -80,7 +83,7 @@
             if(that.addForm.role == 2 || that.addForm.role == 3){
               that.addForm['password'] = '';
             }else{
-              that.addForm['user_id'] = '';
+              that.addForm['hs_user_id'] = '';
             }
             add_users(that.addForm).then((res)=>{
               that.$message({

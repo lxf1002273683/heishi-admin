@@ -1,5 +1,5 @@
-import { asyncRouterMap, constantRouterMap, modulesConfig } from '@/router/index';
-import { getUserId, getPrivileges } from '@/api/login';
+import { asyncRouterMap, constantRouterMap, modulesConfig, warehouseModule } from '@/router/index';
+import { getUserId, getPrivileges, warehouse_list } from '@/api/login';
 
 /**
  * 通过meta.role判断是否与当前用户权限匹配
@@ -35,19 +35,22 @@ function filterAsyncRouter(asyncRouterMap, roles) {
 
 // 递归处理用户权限
 function formatPrivilege(mm) {
-  let arr = [];
-  function demo(m, list) {
+  const arr = [];
+  let configNum = mm;
+  function demo(m) {
     const num = m & (m - 1);
-    if (num === 0) {
-      list.push(m);
-      return list;
-    } else {
-      const n = m - num;
-      list.push(num);
-      return demo(n, list);
+    if (configNum !== 0) {
+      if (num === 0) {
+        arr.push(m);
+        configNum = configNum - m;
+        return demo(configNum);
+      } else {
+        const n = m - 1;
+        return demo(n);
+      }
     }
   }
-  demo(mm, arr);
+  demo(mm);
   return arr;
 }
 
@@ -76,11 +79,23 @@ const permission = {
         // 如果是1大帐号 5第三方帐号
         // 如果是2假帐号 3大卖家 无法登录，不需要进行配置
         // 如果是4业务帐号 需要通过module_privilege进行权限配置才能使用
+
+        // 库房管理需要进行路由配置 
         if (data.role === 0) {
           // 管理员 模块--管理配置 商品编辑 库房管理[1, 4, 8]
-          accessedRouters = filterAsyncRouter(asyncRouterMap, [1, 4, 8]);
-          commitResolve();
-        } else if (data.role === 1 || data.role === 5) { // 大帐号
+          warehouse_list().then((res) => {
+            const warehouses = res.data;
+            for (const i in warehouses) {
+              warehouseModule(warehouses[i].id, warehouses[i].name)
+            }
+            // const module_privilege = formatPrivilege(data.module_privilege);
+            accessedRouters = filterAsyncRouter(asyncRouterMap, [1, 4, 8]);
+            commitResolve();
+          })
+          // accessedRouters = filterAsyncRouter(asyncRouterMap, [1, 4, 8]);
+          // commitResolve();
+        }
+        if (data.role === 1 || data.role === 5) { // 大帐号
           // 大帐号 模块--业务管理 我的商品 我的评论 我的订单 我的帐户[2, 16, 32, 64, 128]
           // 获取管理的大卖家，假帐号
           const obj = {
@@ -102,37 +117,53 @@ const permission = {
             // 动态的路由是关联的用户
             const businessaModules = modulesConfig(arr);
             const newAsyncRouterMap = asyncRouterMap.concat(businessaModules);
-            accessedRouters = filterAsyncRouter(newAsyncRouterMap, [2, 16, 32, 64, 128])
+            accessedRouters = filterAsyncRouter(newAsyncRouterMap, [2, 16, 32, 64, 128, 256])
             commitResolve();
           })
-        } else if (data.role === 4) {
+        }
+        if (data.role === 4) {
           // 业务帐号 需要通过module_privilege进行权限配置才能使用
-          // module_privilege为0时，表示当前业务帐号未进行配置
           if (data.module_privilege !== 0) {
-            const module_privilege = formatPrivilege(data.module_privilege);
-            const userId = data.id;
-            getPrivileges(userId).then((res) => {
-              const users = res[0].owners;
-              const arr = [];
-              for (const i in users) {
-                const obj = {
-                  userId: users[i].id,
-                  userName: users[i].account
+            // 判断是不是大帐号创建的业务帐号 有parent_id是 没有则是管理员创建
+            if (data.parent_id) {
+              const module_privilege = formatPrivilege(data.module_privilege);
+              console.log(module_privilege)
+              const userId = data.id;
+              getPrivileges(userId).then((res) => {
+                const users = res[0].owners;
+                const arr = [];
+                for (const i in users) {
+                  const obj = {
+                    userId: users[i].id,
+                    userName: users[i].account
+                  }
+                  arr.push(obj)
                 }
-                arr.push(obj)
-              }
-              const businessaModules = modulesConfig(arr);
-              const newAsyncRouterMap = asyncRouterMap.concat(businessaModules);
-              // accessedRouters = filterAsyncRouter(newAsyncRouterMap, [2, 16, 32, 64, 128])
-              accessedRouters = filterAsyncRouter(newAsyncRouterMap, module_privilege)
-              commitResolve();
-            })
-          } else {
+                const businessaModules = modulesConfig(arr);
+                const newAsyncRouterMap = asyncRouterMap.concat(businessaModules);
+                accessedRouters = filterAsyncRouter(newAsyncRouterMap, module_privilege)
+                commitResolve();
+              })
+            }
+            // 管理员创建的业务帐号
+            if (!data.parent_id) {
+              // 获取所有仓库进行路由分配
+              warehouse_list().then((res) => {
+                const warehouses = res.data;
+                for (const i in warehouses) {
+                  warehouseModule(warehouses[i].id, warehouses[i].name)
+                }
+                const module_privilege = formatPrivilege(data.module_privilege);
+                accessedRouters = filterAsyncRouter(asyncRouterMap, module_privilege);
+                commitResolve();
+              })
+            }
+          }
+          // module_privilege为0时，表示当前业务帐号未进行配置
+          if (data.module_privilege === 0) {
             accessedRouters = [];
             commitResolve();
           }
-        } else if (data.role === 5) {
-          console.log(data);
         }
       })
     }

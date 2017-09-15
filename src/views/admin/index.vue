@@ -40,9 +40,9 @@
           password_confirmed: null
         },
         loginRules: {
-          password: [{ required: true, trigger: 'blur' }],
-          password_new: [{ required: true, trigger: 'blur' }],
-          password_confirmed: [{ required: true, validator: validatePass, trigger: 'blur' }]
+          password: { required: true, message: '请输入当前密码', trigger: 'blur' },
+          password_new: { required: true, message: '请输入新密码', trigger: 'blur' },
+          password_confirmed: { required: true, message: '请再次输入新密码', trigger: 'blur' }
         }
       }
     },

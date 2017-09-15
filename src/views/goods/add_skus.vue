@@ -24,9 +24,6 @@
         <el-form-item label="价格" prop="price">
           <el-input v-model.number="addForm.price"></el-input>
         </el-form-item>
-        <el-form-item label="库存" prop="stock">
-          <el-input v-model.number="addForm.stock"></el-input>
-        </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="createSpu">立即创建</el-button>
           </el-form-item>
@@ -45,15 +42,13 @@
           spu_id: '',
           type: '',
           desc: '',
-          price: null,
-          stock: null
+          price: null
         },
         rules: {
           spu_id: { required: true, message: '请输入spu名称', trigger: 'blur' },
           type: { required: true, message: '请输入款式类型', trigger: 'blur' },
           desc: { required: true, message: '请输入描述', trigger: 'blur' },
-          price: [{ required: true, message: '请输入价格'},{ type: 'number', message: '必须为数字值'}],
-          stock: [{ required: true, message: '请输入库存'},{ type: 'number', message: '必须为数字值'}]
+          price: [{ required: true, message: '请输入价格'},{ type: 'number', message: '必须为数字值'}]
         },
         // spu远程获取列表
         spuOptions: '',

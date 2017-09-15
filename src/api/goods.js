@@ -25,6 +25,16 @@ export function update_categories(id, form) {
   });
 }
 
+export function delete_categories(id) {
+  return fetch({
+    url: '/warehouse/api/v1/categories',
+    method: 'delete',
+    data: {
+      ids: id
+    }
+  });
+}
+
 // 店铺
 export function shops_list() {
   return fetch({
@@ -89,6 +99,59 @@ export function add_skus(form) {
     url: '/warehouse/api/v1/skus',
     method: 'post',
     data: form
+  });
+}
+
+export function update_skus(id, form) {
+  return fetch({
+    url: '/warehouse/api/v1/skus/' + id,
+    method: 'post',
+    data: form
+  });
+}
+// 申请入库
+export function add_request(form) {
+  return fetch({
+    url: '/warehouse/api/v1/warehousing/request',
+    method: 'post',
+    data: form,
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+}
+
+export function request_list(form) {
+  return fetch({
+    url: '/warehouse/api/v1/warehousing/requests',
+    method: 'get',
+    params: form
+  });
+}
+
+// 查看具体的入库详情
+export function request_info(id) {
+  return fetch({
+    url: '/warehouse/api/v1/warehousing/batch/' + id,
+    method: 'get'
+  });
+}
+
+// 批量将若干SKU注册到若干仓库中
+export function skus_warehouses(form) {
+  return fetch({
+    url: '/warehouse/api/v1/warehouses/skus',
+    method: 'post',
+    data: form
+  });
+}
+
+// 查询某个仓库所有注册过的sku
+export function skus_warehouses_list(form) {
+  return fetch({
+    url: '/warehouse/api/v1/warehouse/skus',
+    method: 'get',
+    params: form
   });
 }
 
