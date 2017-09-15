@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import { getPrivileges, getUserId } from '@/api/login';
 
 
 // 通过dev build 返回不同的页面路径
@@ -21,27 +20,43 @@ const user = _import('admin/index');
 const Users = _import('admin/users');
 const AddUser = _import('admin/add_user');
 const ModulePrivilege = _import('admin/module_privilege');
-
+const UpdateUser = _import('admin/update_user');
 /* 管理配置 -- 模块列表 */
 const Modules = _import('admin/modules');
 const AddModule = _import('admin/add_module');
+/* 管理配置 -- 登录日志 */
+const Logins = _import('admin/logins');
+/* 管理配置 -- 操作日志 */
+const Operations = _import('admin/operations');
 
 /* 业务管理 -- 帐号管理 */
 const BusinessUsers = _import('business/users');
 const BusinessAddUser = _import('business/add_user');
-
 /* 业务管理 -- 权限配置 */
 const BusinessModules = _import('business/module_privilege');
 
-/* 商品库 -- 商品分类 */
+/* 商品库 -- spu */
 const Spus = _import('goods/spus');
 const AddCategories = _import('goods/add_categories');
 const AddSpus = _import('goods/add_spus');
 const AddShops = _import('goods/add_shops');
+/* 商品库 -- sku */
 const Skus = _import('goods/skus');
-const AddSkus = _import('goods/add_skus');
-const Batches = _import('goods/batches');
-const AddBatches = _import('goods/add_batches');
+// const AddSkus = _import('goods/add_skus');
+/* 商品库 -- 入库申请 */
+const Request = _import('goods/request');
+const AddRequest = _import('goods/add_request');
+
+/* 库房管理 -- 仓库管理 */
+const Warehouses = _import('warehouse/warehouses');
+const AddWarehouse = _import('warehouse/add_warehouse');
+/* 库房管理 -- 入库申请列表 */
+const Warehouse = _import('warehouse/warehouse');
+/* 库房管理 -- 仓库详情列表 */
+const CommodityInfo = _import('warehouse/commodity_info');
+/* 库房管理 -- 完成的申请 */
+const FinishWarehouse = _import('warehouse/finish_warehouse');
+
 
 /* 我的商品 */
 const Articles = _import('articles/index');
@@ -54,6 +69,9 @@ const Orders = _import('orders/index');
 
 /* 我的账户 */
 const Account = _import('account/index');
+
+/* 发布商品 */
+const Release = _import('release/index');
 
 Vue.use(Router);
 
@@ -96,8 +114,11 @@ export const asyncRouterMap = [
       { path: 'users', component: Users, name: '用户列表' },
       { path: 'add_user', component: AddUser, name: '创建用户', hidden: true },
       { path: 'module_privilege', component: ModulePrivilege, name: '权限配置', hidden: true },
+      { path: 'update_user', component: UpdateUser, name: '修改用户', hidden: true },
       { path: 'modules', component: Modules, name: '模块列表' },
-      { path: 'add_module', component: AddModule, name: '创建模块', hidden: true }
+      { path: 'add_module', component: AddModule, name: '创建模块', hidden: true },
+      { path: 'logins', component: Logins, name: '登录日志' },
+      { path: 'operations', component: Operations, name: '操作日志' }
     ]
   },
   {
@@ -117,7 +138,7 @@ export const asyncRouterMap = [
     path: '/goods',
     component: Layout,
     redirect: 'noredirect',
-    name: '商品编辑',
+    name: '商品管理',
     meta: { role: [4] },
     children: [
       { path: 'spus', component: Spus, name: 'SPU列表' },
@@ -125,9 +146,9 @@ export const asyncRouterMap = [
       { path: 'add_shops', component: AddShops, name: '创建店铺', hidden: true },
       { path: 'add_categories', component: AddCategories, name: '创建分类', hidden: true },
       { path: 'skus', component: Skus, name: 'SKU列表' },
-      { path: 'add_skus', component: AddSkus, name: '创建SKU', hidden: true },
-      { path: 'batches', component: Batches, name: '批次列表' },
-      { path: 'add_batches', component: AddBatches, name: '创建批次', hidden: true }
+      // { path: 'add_skus', component: AddSkus, name: '创建SKU', hidden: true },
+      { path: 'request', component: Request, name: '入库申请' },
+      { path: 'add_request', component: AddRequest, name: '申请入库', hidden: true }
     ]
   },
   // 库房管理
@@ -138,15 +159,24 @@ export const asyncRouterMap = [
     name: '库房管理',
     meta: { role: [8] },
     children: [
-      { path: 'spus', component: Spus, name: 'SPU列表' },
-      { path: 'add_spus', component: AddSpus, name: '创建SPU', hidden: true },
-      { path: 'add_shops', component: AddShops, name: '创建店铺', hidden: true },
-      { path: 'add_categories', component: AddCategories, name: '创建分类', hidden: true }
+      { path: 'warehouses', component: Warehouses, name: '仓库管理' },
+      { path: 'add_warehouse', component: AddWarehouse, name: '创建仓库', hidden: true }
     ]
   },
   { path: '*', redirect: '/404', hidden: true }
 ];
 
+// 动态配置仓库路由
+export function warehouseModule(warehouseId, moduleName) {
+  const warehouse = { path: 'warehouse' + warehouseId, component: Warehouse, name: moduleName, id: warehouseId, userName: moduleName, hidden: true };
+  const commodity_info = { path: 'commodityInfo' + warehouseId, component: CommodityInfo, name: moduleName, id: warehouseId, userName: moduleName };
+  const finish_warehouse = { path: 'finishWarehouse' + warehouseId, component: FinishWarehouse, name: moduleName, id: warehouseId, userName: moduleName, hidden: true };
+  asyncRouterMap[3].children.push(warehouse);
+  asyncRouterMap[3].children.push(commodity_info);
+  asyncRouterMap[3].children.push(finish_warehouse);
+}
+
+// 动态配置帐号业务路由
 export function modulesConfig(userIds) {
   // 我的商品
   const articles = {
@@ -184,64 +214,36 @@ export function modulesConfig(userIds) {
     meta: { role: [128] },
     children: []
   }
+  // 发布商品
+  const release = {
+    path: '/release',
+    component: Layout,
+    redirect: 'noredirect',
+    name: '发布商品',
+    meta: { role: [256] },
+    children: []
+  }
   for (let x = 0; x < userIds.length; x++) {
-    const articlesTemplate = { path: 'articles/' + userIds[x].userName, component: Articles, name: '', id: 0 };
-    const commentsTemplate = { path: 'comments/' + userIds[x].userName, component: Comments, name: '', id: 0 };
-    const ordersTemplate = { path: 'orders/' + userIds[x].userName, component: Orders, name: '', id: 0 };
-    const accountTemplate = { path: 'account/' + userIds[x].userName, component: Account, name: '', id: 0 };
-    articlesTemplate.id = commentsTemplate.id = ordersTemplate.id = accountTemplate.id = userIds[x].userId;
-    articlesTemplate.name = commentsTemplate.name = ordersTemplate.name = accountTemplate.name = userIds[x].userName;
+    const articlesTemplate = { path: 'articles/' + userIds[x].userName, component: Articles, name: '', id: 0, userName: '' };
+    const commentsTemplate = { path: 'comments/' + userIds[x].userName, component: Comments, name: '', id: 0, userName: '' };
+    const ordersTemplate = { path: 'orders/' + userIds[x].userName, component: Orders, name: '', id: 0, userName: '' };
+    const accountTemplate = { path: 'account/' + userIds[x].userName, component: Account, name: '', id: 0, userName: '' };
+    const releaseTemplate = { path: 'release/' + userIds[x].userName, component: Release, name: '', id: 0, userName: '' };
+    articlesTemplate.id = commentsTemplate.id = ordersTemplate.id = accountTemplate.id = releaseTemplate.id = userIds[x].userId;
+    articlesTemplate.userName = commentsTemplate.userName = ordersTemplate.userName = accountTemplate.userName = releaseTemplate.userName = userIds[x].userName;
+    articlesTemplate.name = commentsTemplate.name = ordersTemplate.name = accountTemplate.name = releaseTemplate.name = userIds[x].userName;
     articles.children.push(articlesTemplate);
     comments.children.push(commentsTemplate);
     orders.children.push(ordersTemplate);
     account.children.push(accountTemplate);
+    release.children.push(releaseTemplate);
   }
   const businessaRouterMap = [];
   businessaRouterMap.push(articles);
   businessaRouterMap.push(comments);
   businessaRouterMap.push(orders);
   businessaRouterMap.push(account);
+  businessaRouterMap.push(release);
   return businessaRouterMap;
 }
-/**
- * 获取业务帐号绑定的大卖家，假帐号id，动态配置路由
- * 0 表示大帐号， 1 业务帐号， 2 第三方帐号
- *
- */
-// export function businessaAccounts(userId, status) {
-//   switch (status) {
-//     case 0:
-//       const obj = {
-//         parent_id: userId
-//       }
-//       getUserId(obj).then((res) => {
-//         // 获取假帐号，大帐号id生成数组
-//         const data = res.results;
-//         const arr = []
-//         for (const i in data) {
-//           if (data[i].role !== 4) {
-//             arr.push(data[i].id)
-//           }
-//         }
-//         modulesConfig(arr)
-//         // console.log(modulesConfig(arr));
-//         // return modulesConfig(arr);
-//       })
-//       break;
-//     case 1:
-//       getPrivileges(userId).then((res) => {
-//         for (const i in res) {
-//           modulesConfig(res[i].owners)
-//         }
-//       })
-//       break;
-//     case 2:
-//       console.log(asyncRouterMap[6])
-//       break;
-//     case '我的帐户':
-//       console.log(asyncRouterMap[7])
-//       break;
-//   }
-// }
-
 

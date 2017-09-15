@@ -62,7 +62,7 @@
           var that = this;
           return createElement('span', [
               createElement('span', node.label),
-              createElement('i', data.id),
+              // createElement('i', data.id),
               createElement('span', {attrs:{
                   style:"float: right; margin-right: 20px"
               }},[

@@ -65,24 +65,57 @@
             <el-input v-model="scope.row.memo" v-if="inputstatus == scope.$index"></el-input>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="70">
+        <el-table-column label="操作" width="100">
           <template scope="scope">
             <el-input v-model="scope.row.id" type="hidden" class="hiddenbox"></el-input>
-            <el-button size="small" @click="compileModule(scope.$index)">
-              <span v-if="inputstatus != scope.$index">编辑</span>
-              <span v-else="inputstatus != scope.$index">确认</span>
+            <el-button size="small" @click="compileModule(scope.$index)" class="operation">
+              <span v-if="inputstatus != scope.$index">编辑SPU</span>
+              <span v-else="inputstatus != scope.$index">确认修改</span>
             </el-button>
+            <el-button size="small" @click="addSkus(scope.row.id)" class="operation">创建SKU</el-button>
+            <el-button size="small" @click="querySkus(scope.row.id)" class="operation">查询SKU</el-button>
           </template>
         </el-table-column>
       </el-table>
       <el-pagination v-if="totalPages > 10" layout="prev, pager, next" :total="totalPages" @current-change="handleCurrentChange" class='pagination'>
       </el-pagination>
     </div>
+    <el-dialog title="创建SKU" :visible.sync="addSkudialogStatus" top="15%">
+      <div>
+        <el-form label-width="80px" :model="addForm" ref="addForm">
+          <el-form-item label="款式名称" prop="type" required>
+            <el-input v-model="addForm.type"></el-input>
+          </el-form-item>
+          <el-form-item label="销售价格" prop="price" required>
+            <el-input v-model="addForm.price"></el-input>
+          </el-form-item>
+          <el-form-item label="备注" prop="desc">
+            <el-input v-model="addForm.desc"></el-input>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="addSkudialogStatus = false">取 消</el-button>
+        <el-button type="primary" @click="insertSku">确 定</el-button>
+      </div>
+    </el-dialog>
+    <el-dialog :title="querySkudialogTitle" :visible.sync="querySkudialogStatus" top="15%">
+      <div>
+        <el-table :data="skuData" style="width: 100%" stripe border >
+          <el-table-column prop="type" label="款式名称"></el-table-column>
+          <el-table-column prop="desc" label="描述"></el-table-column>
+          <el-table-column prop="price" label="价格"></el-table-column>
+        </el-table>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="querySkudialogStatus = false">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-  import { spus_list, update_spus } from '@/api/goods';
+  import { spus_list, update_spus, add_skus, skus_list } from '@/api/goods';
   import { getToken } from '@/utils/auth';
 
   export default {
@@ -100,49 +133,57 @@
         // imageUrl 上传预览图 image存储要提交到服务端的url 
         imageUrl: '',
         image: '',
-        action: this.$store.getters.hosts + '/warehouse/api/v1/images'
+        action: this.$store.getters.hosts + '/warehouse/api/v1/images',
+        // 创建sku
+        addSkudialogStatus: false,
+        addForm: {
+          spu_id: '',
+          type: '',
+          desc: '',
+          price: ''
+        },
+        // 查询sku
+        querySkudialogStatus: false,
+        skuData: [],
+        querySkudialogTitle: ''
       }
     },
     created() {
       // 获取现有的分类
-      this.getSpus();
+      this.initSpusList();
     },
     methods: {
-      getSpus() {
-        const that = this;
-        spus_list().then((res) => {
-          that.tableData = res.result;
-          that.totalPages = res.totalPages*10;
-        })
-      },
+      // 修改spu部分信息
       compileModule(index){
         var that = this;
-        if(this.inputstatus !== null){
-          this.inputstatus = null;
-          const id = this.tableData[index]['id'];
+        if(that.inputstatus !== null){
+          const inputstatus = that.inputstatus;
+          const id = that.tableData[inputstatus]['id'];
           const obj = {
-            name: this.tableData[index]['name'],
-            short_name: this.tableData[index]['short_name'],
-            brand_name: this.tableData[index]['brand_name'],
-            image: this.image,
-            desc: this.tableData[index]['desc'],
-            memo: this.tableData[index]['memo']
+            name: that.tableData[inputstatus]['name'],
+            short_name: that.tableData[inputstatus]['short_name'],
+            brand_name: that.tableData[inputstatus]['brand_name'],
+            image: that.image,
+            desc: that.tableData[inputstatus]['desc'],
+            memo: that.tableData[inputstatus]['memo']
           }
           update_spus(id, obj).then(()=>{
             that.$message({
               message: '修改成功',
               type: 'success'
             });
-            this.imageUrl = '';
+            that.imageUrl = '';
+            that.inputstatus = null;
           }).catch(function(err){
             that.$message({
               message: '修改失败',
               type: 'error'
             });
-            this.imageUrl = '';
+            that.inputstatus = null;
+            that.imageUrl = '';
           })
         }else{
-          this.inputstatus = index;
+          that.inputstatus = index;
         }
       },
       // 上传成功后的回调
@@ -153,24 +194,77 @@
       },
       // 分页
       handleCurrentChange(val) {
-        const that = this
         const obj = {
           page: val,
           category_name: this.searchInputCategory,
           shop_name: this.searchInputShop
         }
-        spus_list(obj).then((res) => {
-          that.tableData = res.result;
-        })
+        this.initSpusList(obj);
       },
       // 店铺搜索
       handleIconClick() {
-        const that = this
         const obj = {
           shop_name: this.searchInputShop,
           category_name: this.searchInputCategory
         }
-        spus_list(obj).then((res) => {
+        this.initSpusList(obj);
+      },
+      // 打开创建SKU模态框
+      addSkus(id) {
+        this.addForm.spu_id = id;
+        this.addSkudialogStatus = true;
+      },
+      // 检验sku信息并创建
+      insertSku() {
+        const that = this
+        if(!this.addForm.type){
+          that.$message({
+            message: '请填写款式名称',
+            type: 'error'
+          });
+          return false;
+        }
+        if(!this.addForm.price || !$.isNumeric(this.addForm.price)){
+          that.$message({
+            message: '请填写销售价格，注意格式是否正确',
+            type: 'error'
+          });
+          return false;
+        }
+        add_skus(that.addForm).then(() => {
+          that.$message({
+            message: '创建成功',
+            type: 'success'
+          });
+          that.$refs.addForm.resetFields();
+          that.addSkudialogStatus = false;
+        },() => {
+          that.$message({
+            message: '创建失败',
+            type: 'error'
+          });
+        })
+      },
+      // 查询当前spu对象的所有sku
+      querySkus(id) {
+        const obj = {
+          spu_id: id
+        }
+        const that = this;
+        skus_list(obj).then((res) => {
+          that.skuData = res.result;
+          that.querySkudialogTitle = res.result[0]['spu_name'];
+        })
+        this.querySkudialogStatus = true;
+      },
+      // 获取spu列表
+      initSpusList(obj) {
+        const that = this;
+        const params = {};
+        if(obj){
+          $.extend(params, obj)
+        }
+        spus_list(params).then((res) => {
           that.tableData = res.result;
           // 重置totalPages 计算是否有分页
           that.totalPages = res.totalPages*10;
@@ -211,6 +305,9 @@
     .pagination{
       text-align: center;
       padding: 20px 0;
+    }
+    .operation{
+      margin: 3px 0;
     }
   }
 </style>

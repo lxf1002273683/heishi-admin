@@ -5,11 +5,13 @@
       <router-link to="/admin/add_user">
         <el-menu-item index="2">创建用户</el-menu-item>
       </router-link>
+      <router-link to="/admin/update_user">
+        <el-menu-item index="3">修改用户</el-menu-item>
+      </router-link>
       <router-link to="/admin/module_privilege">
-        <el-menu-item index="3">权限配置</el-menu-item>
+        <el-menu-item index="4">权限配置</el-menu-item>
       </router-link>
     </el-menu>
-    具体显示信息待定
     <div class="tableData">
       <el-table :data="tableData" style="width: 100%" stripe border >
         <el-table-column prop="account" label="用户名">

@@ -26,6 +26,15 @@ export function users_list(from) {
   });
 }
 
+// 修改用户信息
+export function update_user(id, from) {
+  return fetch({
+    url: '/warehouse/api/v1/users/' + id,
+    method: 'post',
+    data: from
+  });
+}
+
 // 修改用户信息--假帐号，大卖家关联大帐号
 export function relevanceUser_user(id, parentId) {
   return fetch({
@@ -74,3 +83,25 @@ export function user_privilege(from) {
   });
 }
 
+// 登录日志
+export function logins(pages) {
+  return fetch({
+    url: '/warehouse/api/v1/logs/logins',
+    method: 'get',
+    params: {
+      page: pages,
+      size: 20
+    }
+  });
+}
+// 操作日志
+export function operations(pages) {
+  return fetch({
+    url: '/warehouse/api/v1/logs/operations',
+    method: 'get',
+    params: {
+      page: pages,
+      size: 20
+    }
+  });
+}

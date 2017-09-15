@@ -56,23 +56,25 @@
       },
       compileModule(index) {
         var that = this;
-        if(this.inputstatus !== null){
-          this.inputstatus = null;
-          const id = this.tableData[index]['id'];
-          const name = this.tableData[index]['name'];
+        if(that.inputstatus !== null){
+          const inputstatus = that.inputstatus;
+          const id = that.tableData[inputstatus]['id'];
+          const name = that.tableData[inputstatus]['name'];
           update_module(id, name).then((res)=>{
             that.$message({
               message: '修改成功',
               type: 'success'
             });
+            that.inputstatus = null;
           }).catch(function(err){
             that.$message({
               message: '修改失败',
               type: 'error'
             });
+            that.inputstatus = null;
           })
         }else{
-          this.inputstatus = index;
+          that.inputstatus = index;
         }
       }
     }

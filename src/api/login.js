@@ -37,6 +37,14 @@ export function getUserId(form) {
   });
 }
 
+// 获取仓库列表  默认为10个
+export function warehouse_list() {
+  return fetch({
+    url: '/warehouse/api/v1/warehouses',
+    method: 'get'
+  });
+}
+
 // 暂时没用使用
 export function logout() {
   return fetch({

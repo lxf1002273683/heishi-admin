@@ -7,7 +7,10 @@
         <router-link to="/admin/add_user">
           <el-menu-item index="2">创建用户</el-menu-item>
         </router-link>
-        <el-menu-item index="3">权限配置</el-menu-item>
+        <router-link to="/admin/update_user">
+          <el-menu-item index="3">修改用户</el-menu-item>
+        </router-link>
+        <el-menu-item index="4">权限配置</el-menu-item>
       </el-menu>
 <!-- 管理员给业务帐号配置权限  此业务帐号必须是管理员创建-->
       <div class="privilege">
@@ -58,7 +61,7 @@
     name: 'module_privilege',
     data() {
       return {
-        activeIndex: '3',
+        activeIndex: '4',
         userOptions: null,
         shopDefault: null,
         checkList: [],
