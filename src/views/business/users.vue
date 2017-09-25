@@ -6,7 +6,6 @@
         <el-menu-item index="2">创建用户</el-menu-item>
       </router-link>
     </el-menu>
-    具体显示信息待定
     <div class="tableData">
       <el-table :data="tableData" style="width: 100%" stripe border >
         <el-table-column prop="account" label="用户名">

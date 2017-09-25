@@ -63,6 +63,7 @@ const Articles = _import('articles/index');
 
 /* 我的评论 */
 const Comments = _import('comments/index');
+const Quickphrases = _import('comments/quickphrases');
 
 /* 我的订单 */
 const Orders = _import('orders/index');
@@ -71,7 +72,10 @@ const Orders = _import('orders/index');
 const Account = _import('account/index');
 
 /* 发布商品 */
-const Release = _import('release/index');
+const Release = _import('articles/release');
+
+/* 财务管理 */
+const Finance = _import('finance/index');
 
 Vue.use(Router);
 
@@ -163,10 +167,21 @@ export const asyncRouterMap = [
       { path: 'add_warehouse', component: AddWarehouse, name: '创建仓库', hidden: true }
     ]
   },
+  // 财务管理
+  {
+    path: '/finance',
+    component: Layout,
+    redirect: 'noredirect',
+    name: '财务管理',
+    meta: { role: [256] },
+    children: [
+      { path: 'finance', component: Finance, name: '审核列表' }
+    ]
+  },
   { path: '*', redirect: '/404', hidden: true }
 ];
 
-// 动态配置仓库路由
+// 动态配置仓库部分路由
 export function warehouseModule(warehouseId, moduleName) {
   const warehouse = { path: 'warehouse' + warehouseId, component: Warehouse, name: moduleName, id: warehouseId, userName: moduleName, hidden: true };
   const commodity_info = { path: 'commodityInfo' + warehouseId, component: CommodityInfo, name: moduleName, id: warehouseId, userName: moduleName };
@@ -185,7 +200,9 @@ export function modulesConfig(userIds) {
     redirect: 'noredirect',
     name: '我的商品',
     meta: { role: [16] },
-    children: []
+    children: [
+      { path: 'release', component: Release, name: '发布商品', hidden: true }
+    ]
   }
   // 我的评论
   const comments = {
@@ -215,35 +232,36 @@ export function modulesConfig(userIds) {
     children: []
   }
   // 发布商品
-  const release = {
-    path: '/release',
-    component: Layout,
-    redirect: 'noredirect',
-    name: '发布商品',
-    meta: { role: [256] },
-    children: []
-  }
+  // const release = {
+  //   path: '/release',
+  //   component: Layout,
+  //   redirect: 'noredirect',
+  //   name: '发布商品',
+  //   meta: { role: [256] },
+  //   children: [
+  //     { path: 'release', component: Release, name: '发布商品', id: 0, userName: '' }
+  //   ]
+  // }
   for (let x = 0; x < userIds.length; x++) {
-    const articlesTemplate = { path: 'articles/' + userIds[x].userName, component: Articles, name: '', id: 0, userName: '' };
-    const commentsTemplate = { path: 'comments/' + userIds[x].userName, component: Comments, name: '', id: 0, userName: '' };
-    const ordersTemplate = { path: 'orders/' + userIds[x].userName, component: Orders, name: '', id: 0, userName: '' };
-    const accountTemplate = { path: 'account/' + userIds[x].userName, component: Account, name: '', id: 0, userName: '' };
-    const releaseTemplate = { path: 'release/' + userIds[x].userName, component: Release, name: '', id: 0, userName: '' };
-    articlesTemplate.id = commentsTemplate.id = ordersTemplate.id = accountTemplate.id = releaseTemplate.id = userIds[x].userId;
-    articlesTemplate.userName = commentsTemplate.userName = ordersTemplate.userName = accountTemplate.userName = releaseTemplate.userName = userIds[x].userName;
-    articlesTemplate.name = commentsTemplate.name = ordersTemplate.name = accountTemplate.name = releaseTemplate.name = userIds[x].userName;
+    const articlesTemplate = { path: 'articles/' + userIds[x].userId, component: Articles, name: '', id: 0, userName: '' };
+    const commentsTemplate = { path: 'comments/' + userIds[x].userId, component: Comments, name: '', id: 0, userName: '' };
+    const commentsQuickphrases = { path: 'quickphrases/' + userIds[x].userId, component: Quickphrases, name: '', id: 0, userName: '', hidden: true };
+    const ordersTemplate = { path: 'orders/' + userIds[x].userId, component: Orders, name: '', id: 0, userName: '' };
+    const accountTemplate = { path: 'account/' + userIds[x].userId, component: Account, name: '', id: 0, userName: '' };
+    articlesTemplate.id = commentsTemplate.id = ordersTemplate.id = accountTemplate.id = userIds[x].userId;
+    articlesTemplate.userName = commentsTemplate.userName = ordersTemplate.userName = accountTemplate.userName = userIds[x].userName;
+    articlesTemplate.name = commentsTemplate.name = ordersTemplate.name = accountTemplate.name = userIds[x].userName;
     articles.children.push(articlesTemplate);
     comments.children.push(commentsTemplate);
+    comments.children.push(commentsQuickphrases);
     orders.children.push(ordersTemplate);
     account.children.push(accountTemplate);
-    release.children.push(releaseTemplate);
   }
   const businessaRouterMap = [];
   businessaRouterMap.push(articles);
   businessaRouterMap.push(comments);
   businessaRouterMap.push(orders);
   businessaRouterMap.push(account);
-  businessaRouterMap.push(release);
   return businessaRouterMap;
 }
 

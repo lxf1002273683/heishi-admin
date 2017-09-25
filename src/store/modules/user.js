@@ -1,9 +1,8 @@
 import { login, logout, getInfo } from '@/api/login';
-import { getToken, setToken, removeToken, getTokenTime, setTokenTime } from '@/utils/auth';
+import { getToken, setToken, removeToken, setTokenTime } from '@/utils/auth';
 const user = {
   state: {
     token: getToken(),  // 获取当前token
-    token_time: getTokenTime(),  // 获取当前token过期时间
     id: '',       // 用户id
     name: '',       // 用户名称
     avatar: '',     // 用户头像
@@ -25,9 +24,6 @@ const user = {
     },
     SET_USER_ID: (state, id) => {
       state.id = id;
-    },
-    SET_TOKEN_TIME: (state, time) => {
-      state.token_time = time;
     }
   },
 
@@ -44,7 +40,6 @@ const user = {
           setTokenTime(new Date().getTime());
           // 将token存在vuex状态中
           commit('SET_TOKEN', data.token);
-          commit('SET_TOKEN_TIME', new Date().getTime());
           // 将Promise对象的状态从“未完成”变为“成功”
           resolve();
         }).catch(error => {

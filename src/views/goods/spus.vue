@@ -107,9 +107,6 @@
           <el-table-column prop="price" label="价格"></el-table-column>
         </el-table>
       </div>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="querySkudialogStatus = false">确 定</el-button>
-      </div>
     </el-dialog>
   </div>
 </template>
@@ -238,9 +235,9 @@
           });
           that.$refs.addForm.resetFields();
           that.addSkudialogStatus = false;
-        },() => {
+        },(error) => {
           that.$message({
-            message: '创建失败',
+            message: error.message,
             type: 'error'
           });
         })

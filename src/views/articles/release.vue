@@ -1,12 +1,12 @@
 <template>
   <div class="app-container">
     <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
-      <el-menu-item index="1">商品列表</el-menu-item>
-      <router-link :to="{ path: '/articles/release', query: { id: query.id, name: query.name }}">
-        <el-menu-item index="2">发布商品</el-menu-item>
+      <router-link :to="{ path: '/articles/articles/' + query.name, query: { id: query.id, name: query.name }}">
+        <el-menu-item index="1">商品列表</el-menu-item>
       </router-link>
+      <el-menu-item index="2">发布商品</el-menu-item>
     </el-menu>
-    id为{{query.id}}, {{query.name}} 的商品
+    id为{{query.id}}, {{query.name}} 的发布商品
   </div>
 </template>
 
@@ -17,7 +17,7 @@
   export default {
     data() {
       return {
-        activeIndex: '1',
+        activeIndex: '2',
         query: {
           name: this.$route.query.name,
           id: this.$route.query.id

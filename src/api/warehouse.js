@@ -31,12 +31,20 @@ export function get_request(id) {
   });
 }
 
-// 提交入库申请
-export function pass_request(id, form) {
+// 分批入库
+export function part_request(id, form) {
   return fetch({
     url: '/warehouse/api/v1/warehousing/batch/' + id,
     method: 'post',
     data: form
+  });
+}
+
+// 完成入库
+export function pass_request(id) {
+  return fetch({
+    url: '/warehouse/api/v1/warehousing/batch/' + id + '/finish',
+    method: 'post'
   });
 }
 

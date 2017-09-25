@@ -22,18 +22,17 @@
         <template v-for="item in tableData">
           <el-collapse-item :title="item.batch_number" :name="item.id">
             <el-table :data="item.batches" style="width: 100%" stripe border >
-              <el-table-column label="SKU" width="120">
-                <template scope="scope">
-                  <span>{{scope.row.sku.spu_name}}/{{scope.row.sku.type}}</span>
-                </template>
-              </el-table-column>
+              <el-table-column prop="sku.spu_name" label="商品名称"></el-table-column>
+              <el-table-column prop="sku.type" label="款式"></el-table-column>
               <el-table-column prop="purchasing_price" label="商品进价">
               </el-table-column>
               <el-table-column prop="quantity" label="进货数量">
               </el-table-column>
+              <el-table-column prop="actual_quantity" label="入库数量">
+              </el-table-column>
               <el-table-column prop="presale_quantity" label="预售数量">
               </el-table-column>
-              <el-table-column prop="estimated_arrival_time" label="预计到库时间">
+              <el-table-column prop="arrival_time" label="到库时间">
               </el-table-column>
             </el-table>
           </el-collapse-item>

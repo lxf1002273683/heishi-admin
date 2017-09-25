@@ -6,6 +6,7 @@
             <el-select v-model="shopDefault" filterable placeholder="请选择" @change="selectChange" class="select_shop_id">
               <el-option v-if="item.role == 4" v-for="item in userOptions" :key="item.id" :label="item.account" :value="item.id"></el-option>
             </el-select>
+            <span style="color: red">此大帐号下的业务账号</span>
           </el-form-item>
           <el-checkbox-group v-model="checkUserList" @change="userCheckedCitiesChange" class="modules_list">
             <div class="modules">选择帐号</div>
@@ -13,6 +14,7 @@
               <!-- 只显示大帐号中的业务模块 -->
               <el-checkbox :label="item.id" v-if="item.role != 4">{{item.account}}</el-checkbox>
             </template>
+            <span style="color: red;font-size: 14px;">此大帐号下的假帐号，大卖家</span>
           </el-checkbox-group>
           <el-checkbox-group v-model="checkList" @change="moduleCheckedCitiesChange" class="modules_list">
             <div class="modules">选择模块</div>
