@@ -11,8 +11,8 @@
     </el-menu>
     <div class="warehouse_list">
       <div class="search">
-        <span class="search_title">SKU查询：</span>
-        <el-select v-model="skuOptions" filterable clearable remote placeholder="请输入查询的SKU" :remote-method="remoteMethod" :loading="loading"  @change="selectChange" class="select_sku_id searchInput">
+        <span class="search_title">商品查询：</span>
+        <el-select v-model="skuOptions" filterable clearable remote placeholder="请输入查询的商品名称" :remote-method="remoteMethod" :loading="loading"  @change="selectChange" class="select_sku_id searchInput">
             <el-option v-for="item in skuItems" :key="item.value" :label="item.spu_name+'/'+item.type" :value="item.id">
               <span>{{ item.spu_name+'/'+item.type }}</span>
             </el-option>
@@ -22,25 +22,20 @@
         <template v-for="(item, index) in tableData">
           <el-collapse-item :title="item.batch_number" :name="item.id">
             <el-table :data="item.batches" style="width: 100%" stripe border >
-              <el-table-column label="SKU" width="120">
-                <template scope="scope">
-                  <span>{{scope.row.sku.spu_name}}/{{scope.row.sku.type}}</span>
-                </template>
-              </el-table-column>
-              <el-table-column prop="purchasing_price" label="商品进价">
-              </el-table-column>
-              <el-table-column prop="quantity" label="进货数量">
-              </el-table-column>
-              <el-table-column prop="sale_priority" label="销售优先级">
-              </el-table-column>
-              <el-table-column prop="presale_quantity" label="预售数量">
-              </el-table-column>
-              <el-table-column label="操作">
+              <el-table-column prop="sku.spu_name" label="商品名称"></el-table-column>
+              <el-table-column prop="sku.type" label="款式"></el-table-column>
+              <el-table-column prop="purchasing_price" label="商品进价"></el-table-column>
+              <el-table-column prop="quantity" label="进货数量"></el-table-column>
+              <el-table-column prop="actual_quantity" label="已入库数量"></el-table-column>
+              <el-table-column prop="sale_priority" label="销售优先级"></el-table-column>
+              <el-table-column prop="presale_quantity" label="预售数量"></el-table-column>
+              <el-table-column label="操作" width="90">
                 <template scope="scope">
                   <!-- 传入单个申请的id，进行具体信息查询 -->
-                  <el-button v-if="scope.row.sale_status != 1" type="text" @click="dialogOpen(scope.row.id,scope.$index,index)">确认入库</el-button>
-                  <el-button v-if="scope.row.sale_status != 1" type="text" @click="presellCommodity(scope.row.id,scope.$index,index)">预售商品</el-button>
-                  <span v-if="scope.row.sale_status == 1">已入库</span>
+                  <el-button v-if="scope.row.sale_status != 3" type="text" @click="finishCommodity(scope.row.id)">完成入库</el-button>
+                  <el-button v-if="scope.row.sale_status != 3" type="text" @click="dialogOpen(scope.row.id,scope.$index,index)">部分入库</el-button>
+                  <el-button v-if="scope.row.sale_status != 3" type="text" @click="presellCommodity(scope.row.id,scope.$index,index)">预售商品</el-button>
+                  <span v-if="scope.row.sale_status == 3">已入库</span>
                 </template>
               </el-table-column>
             </el-table>
@@ -53,11 +48,11 @@
     <el-dialog title="入库申请" :visible.sync="dialogStatus" top="5%">
       <div>
         <el-form label-width="80px" :model="addForm" ref="addForm" class="addForm" :rules="rules">
-          <el-form-item label="商品名称" prop="spu_name">
-            <el-input v-model="addForm.spu_name" :disabled="true"></el-input>
+          <el-form-item label="商品名称" prop="sku.spu_name">
+            <el-input v-model="addForm.sku.spu_name" :disabled="true"></el-input>
           </el-form-item>
-          <el-form-item label="商品类型" prop="type">
-            <el-input v-model="addForm.type" :disabled="true"></el-input>
+          <el-form-item label="商品类型" prop="sku.type">
+            <el-input v-model="addForm.sku.type" :disabled="true"></el-input>
           </el-form-item>
           <el-form-item label="商品进价" prop="purchasing_price">
             <el-input v-model="addForm.purchasing_price" :disabled="true"></el-input>
@@ -89,8 +84,11 @@
           <el-form-item label="优先级" prop="sale_priority">
             <el-input v-model="addForm.sale_priority"></el-input>
           </el-form-item>
-          <el-form-item label="入库数量" prop="actual_quantity">
-            <el-input v-model.number="addForm.actual_quantity" placeholder="残次品请不要入库"></el-input>
+          <el-form-item label="已入库数">
+            <el-input :value="addForm.actual_quantity" :disabled="true"></el-input>
+          </el-form-item>
+          <el-form-item label="入库数量" prop="wait_quantity">
+            <el-input v-model.number="addForm.wait_quantity" placeholder="残次品请不要入库"></el-input>
           </el-form-item>
           <el-form-item label="保质期" prop="shelf_life">
             <el-date-picker class="picker" v-model="addForm.shelf_life" align="right" format="yyyy-MM-dd" type="date" placeholder="可不填写" @change='expirationPickerChange'>
@@ -117,7 +115,7 @@
 </template>
 <script>
   import { request_list, skus_list, request_info } from '@/api/goods';
-  import { update_scale, pass_request } from '@/api/warehouse';
+  import { update_scale, pass_request, part_request } from '@/api/warehouse';
 
   export default {
     data() {
@@ -128,16 +126,19 @@
           id: this.$route.query.id,
         },
         addForm: {
-          id: '',               // 单个批次id
-          index: '',            // 当前批次索引
+          index: '',            // 当前批次在列表中的索引
           parent_index: '',     // 当前入库申请索引
-          spu_name: '',         // 商品名称
-          type: '',             // 商品类型
+          id: '',               // 单个批次id
+          sku: {
+            spu_name: '',         // 商品名称
+            type: '',             // 商品类型
+          },
           specification: '',    // 商品规格
           shelf_life: '',       // 保质期
           purchasing_price: '', // 商品进价
           quantity: '',         // 进货数量
-          actual_quantity: '',  // 入库数量
+          actual_quantity: '',  // 当前库存
+          wait_quantity: 0,     // 要入库数量
           arrival_time: '',     // 入库时间
           origin: '',           // 产地
           color: '',            // 颜色
@@ -150,7 +151,7 @@
           purchasing_channel: ''// 进货渠道
         },
         rules: {
-          actual_quantity: [{ required: true, message: '请填写商品进价'},{ type: 'number', message: '必须为数字值'}],
+          wait_quantity: [{ required: true, message: '请填写商品进价'},{ type: 'number', message: '必须为数字值'}],
         },
         activeNames: '',
         tableData: [],
@@ -172,22 +173,9 @@
         const that = this;
         that.dialogStatus = true;
         request_info(id).then((res) => {
-          that.addForm.id = id;
           that.addForm.index = index;
           that.addForm.parent_index = parent_index;
-          that.addForm.spu_name = res.sku.spu_name;
-          that.addForm.type = res.sku.type;
-          that.addForm.purchasing_price = res.purchasing_price;
-          that.addForm.quantity = res.quantity;
-          that.addForm.sale_priority = res.sale_priority;
-          that.addForm.request_memo = res.request_memo;
-          that.addForm.specification = res.info.specification;
-          that.addForm.origin = res.info.origin;
-          that.addForm.manufacturer = res.info.manufacturer;
-          that.addForm.color = res.info.color;
-          that.addForm.size = res.info.size;
-          that.addForm.weight = res.info.weight;
-          that.addForm.purchasing_channel = res.info.purchasing_channel;
+          $.extend(that.addForm, res);
         })
       },
       // 保质期选择
@@ -217,27 +205,46 @@
         }
         this.initRequestList(obj);
       },
-      // 确认入库
+      // 部分入库
       addRequest() {
         const that =this;
         this.$refs.addForm.validate((valid) => {
           if (valid) {
-            pass_request(that.addForm.id, that.addForm).then(() => {
-              that.$message({
-                message: '入库成功',
-                type: 'success'
-              });
-              that.dialogStatus = false;
-              that.$refs.addForm.resetFields();
-              // 入库成功后将此条状态更改
-              that.tableData[that.addForm.parent_index].batches[that.addForm.index].sale_status = 1;
-            },(error) => {
-              console.log(error);
-            })
+            // 判断用户输入的数量是否已经超过 进货数量
+            const status = (that.addForm.actual_quantity + that.addForm.wait_quantity) > that.addForm.quantity;
+            if (status) {
+              that.$confirm('请注意，库存数量超过进货数量，是否继续?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+              }).then(() => {
+                that.addForm.actual_quantity = that.addForm.wait_quantity;
+                that.part_request();
+              }).catch(() => {});
+            } else {
+              that.addForm.actual_quantity = that.addForm.wait_quantity;
+              that.part_request();
+            }
           } else {
             return false;
           }
         });
+      },
+      // 部分入库请求
+      part_request() {
+        const that = this;
+        part_request(that.addForm.id, that.addForm).then(() => {
+          that.$message({
+            message: '入库成功',
+            type: 'success'
+          });
+          that.dialogStatus = false;
+          that.$refs.addForm.resetFields();
+          // 入库成功后将此条状态更改
+          that.tableData[that.addForm.parent_index].batches[that.addForm.index].sale_status = 1;
+        },(error) => {
+          console.log(error);
+        })
       },
       // 远程搜索sku
       remoteMethod(query) {
@@ -298,6 +305,22 @@
             that.$message({
               type: 'error',
               message: '预售数量累计不能大于请求入库数量'
+            });
+          })
+        }).catch(() => {});
+      },
+      // 完成入库操作
+      finishCommodity(id) {
+        const that = this;
+        that.$confirm('是否确认商品已全部入库?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          pass_request(id).then((res) => {
+            that.$message({
+              message: '入库成功',
+              type: 'success'
             });
           })
         }).catch(() => {});

@@ -3,7 +3,6 @@ const getters = {
   sidebar: state => state.app.sidebar, // 侧边栏
   hosts: state => state.app.hosts,		 // 域名
   token: state => state.user.token,		// token
-  token_time: state => state.user.token_time,		// token
   id: state => state.user.id,	// 用户头像
   avatar: state => state.user.avatar,	// 用户头像
   name: state => state.user.name,		// 用户名称

@@ -89,7 +89,7 @@ const permission = {
               warehouseModule(warehouses[i].id, warehouses[i].name)
             }
             // const module_privilege = formatPrivilege(data.module_privilege);
-            accessedRouters = filterAsyncRouter(asyncRouterMap, [1, 4, 8]);
+            accessedRouters = filterAsyncRouter(asyncRouterMap, [1, 4, 8, 256]);
             commitResolve();
           })
           // accessedRouters = filterAsyncRouter(asyncRouterMap, [1, 4, 8]);
@@ -117,7 +117,7 @@ const permission = {
             // 动态的路由是关联的用户
             const businessaModules = modulesConfig(arr);
             const newAsyncRouterMap = asyncRouterMap.concat(businessaModules);
-            accessedRouters = filterAsyncRouter(newAsyncRouterMap, [2, 16, 32, 64, 128, 256])
+            accessedRouters = filterAsyncRouter(newAsyncRouterMap, [2, 16, 32, 64, 128])
             commitResolve();
           })
         }
@@ -127,7 +127,6 @@ const permission = {
             // 判断是不是大帐号创建的业务帐号 有parent_id是 没有则是管理员创建
             if (data.parent_id) {
               const module_privilege = formatPrivilege(data.module_privilege);
-              console.log(module_privilege)
               const userId = data.id;
               getPrivileges(userId).then((res) => {
                 const users = res[0].owners;

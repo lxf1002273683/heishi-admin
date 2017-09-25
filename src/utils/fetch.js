@@ -54,14 +54,40 @@ service.interceptors.response.use(
     }
   },
   error => {
-    console.log(error)
-    // 判断是否token过期
-    if ((new Date().getTime() - store.getters.token_time) >= 3600000) {
-      store.dispatch('FedLogOut').then(() => {
-        location.reload();
-      });
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      switch (error.response.status) {
+        // token过期
+        case 401:
+          Message({
+            message: '登录过期，请重新登录',
+            type: 'error',
+            duration: 1 * 1000
+          });
+          setTimeout(() => {
+            store.dispatch('FedLogOut').then(() => {
+              location.reload();
+            });
+          }, 1000)
+          break;
+        default:
+          // Message({
+          //   message: error.response.data.message,
+          //   type: 'error',
+          //   duration: 2 * 1000
+          // });
+          console.log(error.response.status);
+          console.log(error.response.data);
+          console.log(error.response.headers);
+          break;
+      }
+    } else if (error.request) {
+      console.log(error.request);
+    } else {
+      console.log('Error', error.message);
     }
-    return Promise.reject(error);
+    return Promise.reject(error.response.data);
   }
 )
 

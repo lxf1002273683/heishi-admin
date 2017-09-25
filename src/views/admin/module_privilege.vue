@@ -24,7 +24,7 @@
           <div class="modules">选择模块</div>
           <el-checkbox-group v-model="checkList" @change="handleCheckedCitiesChange" class="modules_list">
             <template v-for="item in checkDate">
-              <el-checkbox :label="item.id" v-if="item.privilege == 4 || item.privilege == 8">{{item.name}}</el-checkbox>
+              <el-checkbox :label="item.id" v-if="item.privilege == 4 || item.privilege == 8 || item.privilege == 256">{{item.name}}</el-checkbox>
             </template>
           </el-checkbox-group>
           <el-form-item class="el-btn">
@@ -135,6 +135,7 @@
       getModuleList() {
         const that = this
         modules_list().then((res) => {
+          console.log(res);
           that.checkDate = res;
         })
       },

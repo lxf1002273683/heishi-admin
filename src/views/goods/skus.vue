@@ -8,15 +8,14 @@
     </el-menu>
     <div class="skus_list">
       <div class="search">
-        <el-input placeholder="请输入查询的SPU" v-model="searchInputSpu" class="searchInput">
-          <el-button slot="append" icon="search" v-on:click="handleIconClick"></el-button>
+        <el-input placeholder="请输入查询的商品名称" v-model="searchInputSpu" class="searchInput" @change="selectSku">
         </el-input>
       </div>
       <el-button type="primary" class="add_warehouse" @click="add_warehouse">添至库房</el-button>
       <el-table :data="tableData" style="width: 100%" stripe border @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55">
+        <el-table-column type="selection" width="45">
         </el-table-column>
-        <el-table-column prop="spu_name" label="SPU" width="120">
+        <el-table-column prop="spu_name" label="商品名称" width="120">
         </el-table-column>
         <el-table-column prop="type" label="款式名称">
           <template scope="scope">
@@ -36,26 +35,28 @@
             <el-input v-model="scope.row.price" v-if="inputstatus == scope.$index"></el-input>
           </template>
         </el-table-column>
-        <!-- <el-table-column prop="stock" label="库存">
+        <el-table-column prop="quantity" label="库存">
+        </el-table-column>
+        <el-table-column label="已注册仓库">
           <template scope="scope">
-            <span v-if="inputstatus != scope.$index">{{scope.row.stock}}</span>
-            <el-input v-model="scope.row.stock" v-if="inputstatus == scope.$index"></el-input>
+            <el-tag v-for="item in scope.row.warehouses" :key="item.name" type="primary">{{item.name}}</el-tag>
           </template>
-        </el-table-column> -->
-        <el-table-column label="操作" width="70">
+        </el-table-column>
+        <el-table-column label="操作" width="100">
           <template scope="scope">
             <el-input v-model="scope.row.id" type="hidden" class="hiddenbox"></el-input>
-            <el-button size="small" @click="compileModule(scope.$index)">
-              <span v-if="inputstatus != scope.$index">编辑</span>
-              <span v-else="inputstatus != scope.$index">确认</span>
+            <el-button size="small" type="primary" @click="compileModule(scope.$index)" class="queryRequest">
+              <span v-if="inputstatus != scope.$index">编辑SkU</span>
+              <span v-else="inputstatus != scope.$index">确认修改</span>
             </el-button>
+            <el-button size="small" @click="queryRequest(scope.row.id)" class="queryRequest">进货历史</el-button>
           </template>
         </el-table-column>
       </el-table>
       <el-pagination v-if="totalPages > 10" layout="prev, pager, next" :total="totalPages" @current-change="handleCurrentChange" class='pagination'>
       </el-pagination>
     </div>
-    <el-dialog title="添至库房" :visible.sync="dialogStatus" size="tiny">
+    <el-dialog title="添至库房" :visible.sync="dialogWarehouseStatus" size="tiny">
       <template>
         <el-checkbox-group v-model="checkList">
           <template v-for="item in warehouseList">
@@ -64,15 +65,39 @@
         </el-checkbox-group>
       </template>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogStatus = false">取 消</el-button>
+        <el-button @click="dialogWarehouseStatus = false">取 消</el-button>
         <el-button type="primary" @click="addWarehouse">确 定</el-button>
       </span>
+    </el-dialog>
+    <el-dialog title="进货历史" :visible.sync="dialogQueryRequestStatus" top="5%" size="large">
+      <el-table :data="queryRequestList" style="width: 100%" stripe border >
+        <el-table-column prop="sku_id" label="商品名称（spu_id）" width="120">
+          <!-- <template scope="scope">
+            <span>{{scope.row.sku.spu_name}}/{{scope.row.sku.type}}</span>
+          </template> -->
+        </el-table-column>
+        <el-table-column prop="purchasing_price" label="商品进价">
+        </el-table-column>
+        <el-table-column prop="quantity" label="进货数量">
+        </el-table-column>
+        <el-table-column prop="sale_priority" label="销售优先级">
+        </el-table-column>
+        <el-table-column prop="presale_quantity" label="预售数量">
+        </el-table-column>
+        <el-table-column label="入库状态">
+            <template scope="scope">
+              <span v-if="scope.row.sale_status == 1" class="requestStatus1">已入库</span>
+              <span v-if="scope.row.sale_status != 1" class="requestStatus2">待入库</span>
+            </template>
+          </el-table-column>
+      </el-table>
+      </el-collapse>
     </el-dialog>
   </div>
 </template>
 
 <script>
-  import { skus_list, update_skus, skus_warehouses } from '@/api/goods';
+  import { skus_list, update_skus, skus_warehouses, sku_batches } from '@/api/goods';
   import { warehouse_list } from '@/api/warehouse';
 
   export default {
@@ -84,9 +109,12 @@
         searchInputSpu: '',
         inputstatus: null,
         multipleSelection: [],       // 存放选中的sku
-        dialogStatus: false,
+        dialogWarehouseStatus: false,
+        dialogQueryRequestStatus: false,
         checkList: [],
-        warehouseList: []
+        warehouseList: [],
+        queryRequestList: [],
+        currentpage: 0
       }
     },
     created() {
@@ -98,14 +126,15 @@
     methods: {
       //  分页
       handleCurrentChange(val) {
+        this.currentpage = val
         const obj = {
-          page: val,
+          page: this.currentpage,
           spu_name: this.searchInputSpu
         }
         this.initSkusList(obj);
       },
       // SPU查询
-      handleIconClick(){
+      selectSku() {
         const obj = {
           spu_name: this.searchInputSpu
         }
@@ -142,7 +171,7 @@
       // 点击 添至库房 进行仓库选择
       add_warehouse() {
         if(this.multipleSelection.length){
-          this.dialogStatus = true;
+          this.dialogWarehouseStatus = true;
         }else{
           this.$message({
             message: '请先选择要添加的SKU',
@@ -178,14 +207,31 @@
             message: '添加成功',
             type: 'success'
           });
-          that.dialogStatus = false;
+          that.dialogWarehouseStatus = false;
+          const obj = {
+            page: that.currentpage,
+            spu_name: that.searchInputSpu
+          }
+          that.initSkusList(obj);
+        })
+      },
+      // 打开进货历史模态框
+      queryRequest(id) {
+        const that = this;
+        const obj = {
+          sku_id: id,
+          size: 50
+        }
+        that.dialogQueryRequestStatus = true;
+        sku_batches(obj).then((res) => {
+          that.queryRequestList = res.result;
         })
       },
       // 获取sku方法
       initSkusList(obj) {
         const that = this;
         const params = {
-          size: 20
+          size: 10
         };
         if(obj){
           $.extend(params, obj)
@@ -217,10 +263,16 @@
     .hiddenbox{
       display: none;
     }
+    .el-tag--primary{
+      margin: 3px;
+    }
     .add_warehouse{
       /*margin: 10px;*/
       position: absolute;
       top: 20px;
+    }
+    .queryRequest{
+      margin: 3px 0;
     }
   }
 </style>
