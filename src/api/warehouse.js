@@ -68,5 +68,22 @@ export function get_skus(id, form) {
   });
 }
 
+// 查询出入库记录
+export function stocklogs(form) {
+  return fetch({
+    url: '/warehouse/api/v1/stocklogs',
+    method: 'get',
+    params: form
+  });
+}
+
+// 创建单个费用
+export function add_payment(form) {
+  return fetch({
+    url: '/warehouse/api/v1/warehousing/payment',
+    method: 'post',
+    data: form
+  });
+}
 
 

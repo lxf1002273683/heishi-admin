@@ -1,17 +1,5 @@
 <template>
     <div class="app-container">
-      <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
-        <router-link to="/admin/users">
-          <el-menu-item index="1">用户列表</el-menu-item>
-        </router-link>
-        <router-link to="/admin/add_user">
-          <el-menu-item index="2">创建用户</el-menu-item>
-        </router-link>
-        <router-link to="/admin/update_user">
-          <el-menu-item index="3">修改用户</el-menu-item>
-        </router-link>
-        <el-menu-item index="4">权限配置</el-menu-item>
-      </el-menu>
 <!-- 管理员给业务帐号配置权限  此业务帐号必须是管理员创建-->
       <div class="privilege">
         <span class="title">业务帐号配置权限</span>
@@ -198,7 +186,6 @@
 <style rel="stylesheet/scss" lang="scss" scoped>
   .relevanceUser,
   .privilege{
-    padding: 20px;
     .title{
       margin: 20px;
       display: block;

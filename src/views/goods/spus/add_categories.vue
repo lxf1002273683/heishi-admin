@@ -1,17 +1,6 @@
+<!-- 创建分类 -->
 <template>
   <div class="app-container">
-    <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
-      <router-link to="/goods/spus">
-        <el-menu-item index="1">SPU列表</el-menu-item>
-      </router-link>
-      <router-link to="/goods/add_spus">
-        <el-menu-item index="2">创建SPU</el-menu-item>
-      </router-link>
-      <router-link to="/goods/add_shops">
-        <el-menu-item index="3">创建店铺</el-menu-item>
-      </router-link>
-      <el-menu-item index="4">创建分类</el-menu-item>
-    </el-menu>
     <div class="goodsAddForm">
       <el-form label-width="80px">
         <el-form-item label="一级分类">
@@ -37,7 +26,6 @@
     },
     data() {
       return {
-        activeIndex: '4',
         filterText: '',
         goodsName: '',
         data: [],
@@ -144,7 +132,6 @@
 </script>
 <style rel="stylesheet/scss" lang="scss">
   .goodsAddForm{
-    padding: 20px;
     .el-form-item__label{
       width: 120px;
     }

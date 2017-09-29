@@ -1,17 +1,6 @@
+<!-- spu列表 -->
 <template>
   <div class="app-container">
-    <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
-      <el-menu-item index="1">SPU列表</el-menu-item>
-      <router-link to="/goods/add_spus">
-        <el-menu-item index="2">创建SPU</el-menu-item>
-      </router-link>
-      <router-link to="/goods/add_shops">
-        <el-menu-item index="3">创建店铺</el-menu-item>
-      </router-link>
-      <router-link to="/goods/add_categories">
-        <el-menu-item index="4">创建分类</el-menu-item>
-      </router-link>
-    </el-menu>
     <div class="spus_list">
       <div class="search">
         <el-input placeholder="请输入查询的分类" v-model="searchInputCategory" class="searchInput">
@@ -118,7 +107,6 @@
   export default {
     data() {
       return {
-        activeIndex: '1',
         searchInputCategory: '', // 搜索店铺
         searchInputShop: '', // 搜索分类
         tableData: [],
@@ -272,7 +260,6 @@
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>
   .spus_list{
-    padding: 20px;
     .search{
       .searchInput{
         float: left;

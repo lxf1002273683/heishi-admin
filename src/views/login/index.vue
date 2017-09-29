@@ -64,9 +64,9 @@
               this.$store.dispatch('Login', this.loginForm).then(() => {
                 this.loading = false;
                 this.$router.push({ path: '/' });
-              }).catch(() => {
+              }).catch((error) => {
+                that.$message.error(error.message);
                 this.loading = false;
-                that.$message.error('登录错误');
               });
             } else {
               that.$message.error('登录错误');

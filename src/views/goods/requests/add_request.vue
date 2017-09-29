@@ -1,17 +1,13 @@
+<!-- 创建入库申请 -->
 <template>
   <div class="app-container">
-    <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
-      <router-link to="/goods/request">
-        <el-menu-item index="1">入库申请</el-menu-item>
-      </router-link>
-      <el-menu-item index="2">申请入库</el-menu-item>
-    </el-menu>
     <div class="goodsAddForm">
       <el-form label-width="80px" :model="addForm" ref="addForm" :rules="rules">
         <el-form-item label="仓库" prop="warehouse_id">
-          <el-select v-model="warehouseOptions" filterable placeholder="请选择" class="warehouse_lists" @change="warehouseIdChange">
+          <el-select v-model="warehouseOptions" filterable placeholder="请选择" class="warehouse_lists" @change="warehouseIdChange" :disabled="warehouse_status">
             <el-option v-for="item in warehouse_lists" :key="item.value" :label="item.name" :value="item.id"></el-option>
           </el-select>
+          <span>一个入库申请只能绑定一个仓库</span>
         </el-form-item>
         <el-form-item label="商品名称" prop="sku_id">
           <el-select v-model="skuOptions" clearable filterable remote placeholder="请输入商品名称查询" :remote-method="remoteMethod" :loading="loading"  @change="selectChange" class="select_sku_id">
@@ -104,7 +100,6 @@
   export default {
     data() {
       return {
-        activeIndex: '2',
         // sku远程获取列表
         skuOptions: '',
         skuItems: [],
@@ -112,6 +107,7 @@
         // 仓库列表
         warehouse_lists: [],
         warehouseOptions: '',
+        warehouse_status: false,
         addForm: {
           sku_id: '',
           warehouse_id: '',
@@ -130,7 +126,7 @@
         rules: {
           sku_id: { required: true, message: '请选择SKU', trigger: 'blur' },
           warehouse_id: { required: true, message: '请选择仓库' },
-          purchasing_price: [{ required: true, message: '请填写商品进价'},{ type: 'number', message: '必须为数字值'}],
+          purchasing_price: [{ required: true, message: '请填写商品总价'},{ type: 'number', message: '必须为数字值'}],
           quantity: [{ required: true, message: '请填写商品数量'},{ type: 'number', message: '必须为数字值'}]
         },
         // 实际提交的数据
@@ -163,6 +159,7 @@
             that.skuOptions = '';
             // 重置参数后，初始化仓库id
             that.addForm.warehouse_id = that.warehouseOptions;
+            that.warehouse_status = true;
           } else {
             return false;
           }
@@ -234,7 +231,6 @@
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>
   .goodsAddForm{
-    padding: 20px;
     .el-input{
       width: 240px;
     }

@@ -1,11 +1,6 @@
+<!-- 创建短语模板 -->
 <template>
   <div class="app-container">
-    <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
-      <router-link :to="{ path: '/comments/comments/'+query.id, query: { id: query.id, name: query.name }}">
-        <el-menu-item index="1">评论列表</el-menu-item>
-      </router-link>
-      <el-menu-item index="2">短语列表</el-menu-item>
-    </el-menu>
     <div class="quickphrases_list">
       <el-form autoComplete="on" ref="addForm" :model="addForm" label-width="80px" class="addform" :rules="loginRules">
         <el-form-item label="短语" prop="content">
@@ -35,11 +30,6 @@
   export default {
     data() {
       return {
-        activeIndex: '2',
-        query: {
-          name: this.$route.query.name,
-          id: this.$route.query.id,
-        },
         addForm: {
           content: ''
         },
@@ -106,7 +96,6 @@
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>
   .quickphrases_list{
-    padding: 20px;
     .el-input{
       width: 240px;
     }

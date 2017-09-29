@@ -57,7 +57,6 @@
 <style rel="stylesheet/scss" lang="scss" scoped>
   .orders_table{
     p{
-      height: 30px;
       line-height: 30px;
       margin: 0;
     }
