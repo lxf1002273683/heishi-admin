@@ -1,14 +1,6 @@
+<!-- 仓库商品列表 -->
 <template>
   <div class="app-container">
-    <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
-      <el-menu-item index="1">库房商品</el-menu-item>
-      <router-link :to="{ path: '/warehouse/warehouse'+query.id, query: { id: query.id, name: query.name }}">
-        <el-menu-item index="2">入库申请</el-menu-item>
-      </router-link>
-      <router-link :to="{ path: '/warehouse/finishWarehouse'+query.id, query: { id: query.id, name: query.name }}">
-        <el-menu-item index="2">入库历史</el-menu-item>
-      </router-link>
-    </el-menu>
     <div class="commodity_list">
       <div class="search">
         <span class="search_title">商品查询：</span>
@@ -17,10 +9,11 @@
       <el-table :data="tableData" style="width: 100%" stripe border >
         <el-table-column prop="spu_name" label="商品名称" width="120"></el-table-column>
         <el-table-column prop="type" label="款式"></el-table-column>
+        <el-table-column prop="stock" label="库存"></el-table-column>
         <el-table-column prop="desc" label="备注"></el-table-column>
         <el-table-column label="操作" width="100">
           <template scope="scope">
-            <el-button type="primary" size="small" @click="queryRequest(scope.row.sku_id)">进货历史</el-button>
+            <el-button size="small" @click="queryRequest(scope.row.sku_id)">进货历史</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -33,21 +26,28 @@
       <el-collapse v-model="activeNames" v-if="status == 0">
       <template v-for="item in requestsData">
         <el-collapse-item :title="item.batch_number" name="1">
+          <template slot="title"> <!-- <span>{{item.memo}}</span> -->
+            <span>{{item.batch_number}}</span>
+            <span class="user">申请人：{{item.requester.account}}</span>
+          </template>
           <el-table :data="item.batches" style="width: 100%" stripe border >
+            <el-table-column prop="id" label="ID" width="60"></el-table-column>
             <el-table-column prop="sku.spu_name" label="商品名称"></el-table-column>
             <el-table-column prop="sku.type" label="款式"></el-table-column>
             <el-table-column prop="purchasing_price" label="商品进价"></el-table-column>
             <el-table-column prop="quantity" label="进货数量"></el-table-column>
             <el-table-column prop="actual_quantity" label="入库数量"></el-table-column>
+            <el-table-column prop="payments_sum" label="额外费用(邮费)"></el-table-column>
             <el-table-column prop="sale_priority" label="销售优先级"></el-table-column>
             <el-table-column prop="presale_quantity" label="预售数量"></el-table-column>
             <el-table-column prop="arrival_time" label="到货时间"></el-table-column>
             <el-table-column label="入库状态">
-                <template scope="scope">
-                  <span v-if="scope.row.sale_status == 3" class="requestStatus1">已入库</span>
-                  <span v-if="scope.row.sale_status != 3" class="requestStatus2">待入库</span>
-                </template>
-              </el-table-column>
+              <template scope="scope">
+                <span v-if="scope.row.sale_status == 4" class="requestStatus1">已入库</span>
+                <span v-if="scope.row.sale_status == 1 || scope.row.sale_status == 2" class="requestStatus2">待入库</span>
+                <span v-if="scope.row.sale_status == 0" class="requestStatus2">待审核</span>
+              </template>
+            </el-table-column>
           </el-table>
         </el-collapse-item>
       </template>
@@ -56,17 +56,15 @@
   </div>
 </template>
 <script>
-  import { get_skus } from '@/api/warehouse';
+  import { get_skus, stocklogs } from '@/api/warehouse';
   import { request_list } from '@/api/goods';
 
   export default {
+    // 仓库id name
+    props: ['warehouse_name', 'warehouse_id'],
     data() {
       return {
         activeIndex: '1',
-        query: {
-          name: this.$route.query.name,
-          id: this.$route.query.id,
-        },
         activeNames: '',
         tableData: [],
         totalPages: 0,
@@ -87,7 +85,7 @@
         if(obj){
           $.extend(params, obj)
         }
-        get_skus(this.query.id, params).then((res) => {
+        get_skus(this.warehouse_id, params).then((res) => {
           that.tableData = res.data;
           that.totalPages = res.total;
         })
@@ -95,9 +93,10 @@
       // 查询sku对应的入库申请 
       queryRequest(id){
         const that = this;
+        console.log(id);
         const obj = {
-          warehouse_id: this.query.id,
-          filter: '0,1,2',
+          warehouse_id: this.warehouse_id,
+          filter: '0,1,2,3',
           size: 50,
           sku_id: id
         }
@@ -134,7 +133,6 @@
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>
   .commodity_list{
-    padding: 20px;
     .pagination{
       text-align: center;
       padding: 20px 0;
@@ -158,6 +156,9 @@
   }
   .requestStatus2{
     color: #ff4949;
+  }
+  .user{
+    margin-left: 20px;
   }
 </style>
 

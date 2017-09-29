@@ -1,11 +1,5 @@
 <template>
     <div class="app-container">
-      <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
-        <router-link to="/admin/modules">
-          <el-menu-item index="1">模块列表</el-menu-item>
-        </router-link>
-        <el-menu-item index="2">创建模块</el-menu-item>
-      </el-menu>
       <el-form autoComplete="on" ref="addForm" :model="addForm" label-width="80px" :rules="loginRules" class="addform">
           <el-form-item label="模块名称" prop="name">
               <el-input v-model="addForm.name" autoComplete="on"></el-input>
@@ -27,7 +21,6 @@
 <script>
   import { add_module } from '@/api/admin';
   export default {
-    name: 'add_module',
     data() {
       const validatePrivilege = (rule, value, callback) =>{
         if ((value & (value - 1)) != 0) {
@@ -37,7 +30,6 @@
         }
       }
       return {
-        activeIndex: '2',
         addForm: {
           name: '',
           privilege: ''
@@ -75,7 +67,6 @@
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>
   .addform{
-    padding: 20px;
     .el-input{
       width: 240px;
     }

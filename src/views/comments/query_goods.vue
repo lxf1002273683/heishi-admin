@@ -1,3 +1,4 @@
+<!-- 查询商品信息模板 -->
 <template>
   <div class="goods">
     <el-form label-width="80px">
@@ -10,12 +11,12 @@
       <el-form-item label="时间">
         <span>{{goods.post_date}}</span>
       </el-form-item>
-      <el-form-item label="浏览量">
+      <!-- <el-form-item label="浏览量">
         <span>{{goods.post_hits}}</span>
       </el-form-item>
       <el-form-item label="点赞">
         <span>{{goods.post_like}}</span>
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="内容">
         <span v-html="goods.post_excerpt"></span>
       </el-form-item>
@@ -37,7 +38,7 @@
             <span v-if="item.type == 3" style="color: #00f;">{{item.content}}</span>
             <span v-if="item.type == 4"><img :src="item.content + '@!320x320'"></span>
             <span v-if="item.type == 14" style="color: #7b7b7b;">该用户言论因过于二逼被删除</span>
-            <span class="time">{{item.origincreatetime}}</span>
+            <span class="time">{{item.createtime}}</span>
           </p>
         </div>
       </el-form-item>
@@ -87,7 +88,7 @@
 <style rel="stylesheet/scss" lang="scss" scoped>
   .goods{
     .filepath{
-      width: 300px;
+      width: 100px;
     }
     .el-form-item{
       border-bottom: 1px solid #ccc;
@@ -95,7 +96,7 @@
     }
     .images{
       img{
-        width: 25%;
+        width: 100px;
         margin: 10px 20px;
       }
     }

@@ -1,14 +1,6 @@
+<!-- 待操作入库申请 -->
 <template>
   <div class="app-container">
-    <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
-      <router-link :to="{ path: '/warehouse/commodityInfo'+query.id, query: { id: query.id, name: query.name }}">
-        <el-menu-item index="1">库房商品</el-menu-item>
-      </router-link>
-      <el-menu-item index="2">入库申请</el-menu-item>
-      <router-link :to="{ path: '/warehouse/finishWarehouse'+query.id, query: { id: query.id, name: query.name }}">
-        <el-menu-item index="3">入库历史</el-menu-item>
-      </router-link>
-    </el-menu>
     <div class="warehouse_list">
       <div class="search">
         <span class="search_title">商品查询：</span>
@@ -20,8 +12,10 @@
       </div>
       <el-collapse v-model="activeNames">
         <template v-for="(item, index) in tableData">
-          <el-collapse-item :title="item.batch_number" :name="item.id">
+          <el-collapse-item :name="item.id">
+            <template slot="title">{{item.batch_number}} <!-- <span>{{item.memo}}</span> --></template>
             <el-table :data="item.batches" style="width: 100%" stripe border >
+              <el-table-column prop="id" label="ID" width="60"></el-table-column>
               <el-table-column prop="sku.spu_name" label="商品名称"></el-table-column>
               <el-table-column prop="sku.type" label="款式"></el-table-column>
               <el-table-column prop="purchasing_price" label="商品进价"></el-table-column>
@@ -29,13 +23,18 @@
               <el-table-column prop="actual_quantity" label="已入库数量"></el-table-column>
               <el-table-column prop="sale_priority" label="销售优先级"></el-table-column>
               <el-table-column prop="presale_quantity" label="预售数量"></el-table-column>
-              <el-table-column label="操作" width="90">
+              <el-table-column label="操作" width="110">
                 <template scope="scope">
                   <!-- 传入单个申请的id，进行具体信息查询 -->
-                  <el-button v-if="scope.row.sale_status != 3" type="text" @click="finishCommodity(scope.row.id)">完成入库</el-button>
-                  <el-button v-if="scope.row.sale_status != 3" type="text" @click="dialogOpen(scope.row.id,scope.$index,index)">部分入库</el-button>
-                  <el-button v-if="scope.row.sale_status != 3" type="text" @click="presellCommodity(scope.row.id,scope.$index,index)">预售商品</el-button>
-                  <span v-if="scope.row.sale_status == 3">已入库</span>
+                  <el-button v-if="scope.row.sale_status == 2" size="small" @click="finishCommodity(scope.row.id,scope.$index,index)">完成入库</el-button>
+                  <el-button v-if="scope.row.sale_status == 2 || scope.row.sale_status == 1" size="small" @click="dialogOpen(scope.row.id,scope.$index,index)">
+                    部分入库
+                  </el-button>
+                  <el-button v-if="scope.row.sale_status != 0 && scope.row.sale_status != 4" size="small" @click="presellCommodity(scope.row.id,scope.$index,index)">
+                    预售商品
+                  </el-button>
+                  <span v-if="scope.row.sale_status == 4" style="color: #20a0ff;">已入库</span>
+                  <span v-if="scope.row.sale_status == 0" style="color: red;">待审核</span>
                 </template>
               </el-table-column>
             </el-table>
@@ -48,6 +47,9 @@
     <el-dialog title="入库申请" :visible.sync="dialogStatus" top="5%">
       <div>
         <el-form label-width="80px" :model="addForm" ref="addForm" class="addForm" :rules="rules">
+          <el-form-item label="申请人" prop="requester.account">
+            <el-input v-model="addForm.requester.account" :disabled="true"></el-input>
+          </el-form-item>
           <el-form-item label="商品名称" prop="sku.spu_name">
             <el-input v-model="addForm.sku.spu_name" :disabled="true"></el-input>
           </el-form-item>
@@ -114,31 +116,31 @@
   </div>
 </template>
 <script>
-  import { request_list, skus_list, request_info } from '@/api/goods';
-  import { update_scale, pass_request, part_request } from '@/api/warehouse';
+  import { request_list, request_info } from '@/api/goods';
+  import { update_scale, pass_request, part_request, get_skus } from '@/api/warehouse';
 
   export default {
+    // 仓库id name
+    props: ['warehouse_name', 'warehouse_id'],
     data() {
       return {
-        activeIndex: '2',
-        query: {
-          name: this.$route.query.name,
-          id: this.$route.query.id,
-        },
         addForm: {
-          index: '',            // 当前批次在列表中的索引
-          parent_index: '',     // 当前入库申请索引
+          parent_index: '',     // 批次id
+          index: '',     // 表格位置
           id: '',               // 单个批次id
           sku: {
-            spu_name: '',         // 商品名称
-            type: '',             // 商品类型
+            spu_name: '',       // 商品名称
+            type: '',           // 商品类型
+          },
+          requester: {
+            account: ''         //申请人
           },
           specification: '',    // 商品规格
           shelf_life: '',       // 保质期
           purchasing_price: '', // 商品进价
           quantity: '',         // 进货数量
           actual_quantity: '',  // 当前库存
-          wait_quantity: 0,     // 要入库数量
+          wait_quantity: '',     // 要入库数量
           arrival_time: '',     // 入库时间
           origin: '',           // 产地
           color: '',            // 颜色
@@ -219,11 +221,11 @@
                 type: 'warning'
               }).then(() => {
                 that.addForm.actual_quantity = that.addForm.wait_quantity;
-                that.part_request();
+                that.part_request(that.addForm.wait_quantity);
               }).catch(() => {});
             } else {
               that.addForm.actual_quantity = that.addForm.wait_quantity;
-              that.part_request();
+              that.part_request(that.addForm.wait_quantity);
             }
           } else {
             return false;
@@ -231,7 +233,7 @@
         });
       },
       // 部分入库请求
-      part_request() {
+      part_request(num) {
         const that = this;
         part_request(that.addForm.id, that.addForm).then(() => {
           that.$message({
@@ -240,20 +242,24 @@
           });
           that.dialogStatus = false;
           that.$refs.addForm.resetFields();
-          // 入库成功后将此条状态更改
-          that.tableData[that.addForm.parent_index].batches[that.addForm.index].sale_status = 1;
+          // 入库成功后将此条状态更改 显示完成入库
+          that.tableData[that.addForm.parent_index].batches[that.addForm.index].sale_status = 2;
+          that.tableData[that.addForm.parent_index].batches[that.addForm.index].actual_quantity += num;
         },(error) => {
-          console.log(error);
+          that.$message({
+            message: error.message,
+            type: 'error'
+          });
         })
       },
       // 远程搜索sku
       remoteMethod(query) {
         const that = this;
         const obj = {
-          spu_name: query
+          keywords: query
         }
-        skus_list(obj).then((res) => {
-          that.skuItems = res.result;
+        get_skus(this.warehouse_id, obj).then((res) => {
+          that.skuItems = res.data;
         })
       },
       // 拿到sku后，搜索对应的入库申请
@@ -273,8 +279,8 @@
       initRequestList(obj) {
         const that = this;
         const params = {
-          warehouse_id: this.query.id,
-          filter: '0,1'
+          warehouse_id: this.warehouse_id,
+          filter: '0,1,2'
         }
         if(obj){
           $.extend(params, obj)
@@ -310,7 +316,7 @@
         }).catch(() => {});
       },
       // 完成入库操作
-      finishCommodity(id) {
+      finishCommodity(id, index, parent_index) {
         const that = this;
         that.$confirm('是否确认商品已全部入库?', '提示', {
           confirmButtonText: '确定',
@@ -323,6 +329,8 @@
               type: 'success'
             });
           })
+          // 入库成功后将此条状态更改
+          that.tableData[parent_index].batches[index].sale_status = 4;
         }).catch(() => {});
       }
     }
@@ -330,7 +338,6 @@
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>
   .warehouse_list{
-    padding: 20px;
     .pagination{
       text-align: center;
       padding: 20px 0;
@@ -348,8 +355,9 @@
         padding: 0 20px 20px 0;
       }
     }
-    .el-button+.el-button {
-      margin-left: 0;
+
+    .el-button{
+      margin: 3px 0;
     }
   }
   .addForm{

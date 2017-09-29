@@ -1,11 +1,6 @@
+<!-- 仓库列表 -->
 <template>
   <div class="app-container">
-    <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
-      <el-menu-item index="1">仓库列表</el-menu-item>
-      <router-link to="/warehouse/add_warehouse">
-        <el-menu-item index="2">创建仓库</el-menu-item>
-      </router-link>
-    </el-menu>
     <div class="skus_list">
       <el-table :data="tableData" style="width: 100%" stripe border >
         <el-table-column prop="name" label="仓库名称">
@@ -46,7 +41,6 @@
   export default {
     data() {
       return {
-        activeIndex: '1',
         tableData: [],
         inputstatus: null
       }
@@ -94,7 +88,6 @@
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>
   .skus_list{
-    padding: 20px;
     .pagination{
       text-align: center;
       padding: 20px 0;

@@ -1,11 +1,6 @@
+<!-- 评论列表 -->
 <template>
   <div class="app-container">
-    <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
-      <el-menu-item index="1">评论列表</el-menu-item>
-      <router-link :to="{ path: '/comments/quickphrases/'+query.id, query: { id: query.id, name: query.name }}">
-        <el-menu-item index="2">短语列表</el-menu-item>
-      </router-link>
-    </el-menu>
     <div class="comment_list">
       <div class="search">
         <el-select v-model="selectInput" placeholder="请选择" class="searchInput" @change="selectChange">
@@ -28,7 +23,7 @@
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="发送人">
+        <el-table-column label="买家">
           <template scope="scope">
             <span class="query_orders" @click="query_orders(scope.row.from_uid,scope.row.to_uid)">{{scope.row.from_nickname}}</span>
           </template>
@@ -48,7 +43,7 @@
         </el-table-column>
         <el-table-column label="操作" width="90">
           <template scope="scope">
-            <el-button type="text" @click="openDialog(scope.row.id)">会话记录</el-button>
+            <el-button type="text" @click="openDialog(scope.row.id,scope.$index)">会话记录</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -56,10 +51,10 @@
       </el-pagination>
     </div>
     <!-- 会话记录 -->
-    <el-dialog title="会话记录" :visible.sync="dialogStatus" top="5%" @close="dialogClose" class="comment" size="large">
+    <el-dialog title="会话记录" :visible.sync="dialogStatus" top="5%" @close="dialogClose" class="comment">
       <!-- 增加过渡效果 -->
       <el-collapse-transition>
-        <div class="replyBox" v-show="replyBoxStatus">
+        <div class="replyBox">
           <el-select v-model="replyInput" placeholder="请选择" class="searchInput">
             <el-option :label="'文字回复  '+replyUserName" value="1"></el-option>
             <el-option :label="'图片回复  '+replyUserName" value="2"></el-option>
@@ -78,24 +73,24 @@
         </div>
       </el-collapse-transition>
       <div class="comment_box">
-      <el-table :data="comment_list" style="width: 100%" border>
-        <el-table-column prop="from_nickname" label="发送者" width="180"></el-table-column>
-        <el-table-column prop="content" label="内容">
-          <template scope="scope">
-            <span v-if="scope.row.type != 4">{{scope.row.content}}</span>
-            <span v-if="scope.row.type == 4">
-              <img class="content_img" :src="scope.row.content + '@!320x320'">
+        <template v-for="item in comment_list">
+          <div v-if="seller_id == item.from_uid" class="comments_list seller_user">
+            <span class="time"><b>{{item.created_at}}</b></span>
+            <span v-if="item.type != 4" class="content">{{item.content}}</span>
+            <span v-if="item.type == 4" class="content">
+              <img class="content_img" :src="item.content + '@!320x320'">
             </span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="to_nickname" label="接收者" width="180"></el-table-column>
-        <el-table-column prop="created_at" label="时间"></el-table-column>
-        <el-table-column label="操作" width="100">
-          <template scope="scope">
-            <el-button type="text" @click="addReplyUser(scope.row.from_nickname,scope.row.id)">回复发送者</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+            <span class="user"><img :src="item.from_avatar + '/64'"></span>
+          </div>
+          <div v-if="seller_id != item.from_uid" class="comments_list buy_user">
+            <span class="time"><b>{{item.created_at}}</b></span>
+            <span class="user"><img :src="item.from_avatar + '/64'"></span>
+            <span v-if="item.type != 4" class="content">{{item.content}}</span>
+            <span v-if="item.type == 4" class="content">
+              <img class="content_img" :src="item.content + '@!320x320'">
+            </span>
+          </div>
+        </template>
       </div>
     </el-dialog>
     <!-- 历史订单 -->
@@ -119,13 +114,10 @@
       OrdersList,
       Goods
     },
+    // 仓库id name
+    props: ['user_name', 'user_id'],
     data() {
       return {
-        activeIndex: '1',
-        query: {
-          name: this.$route.query.name,
-          id: this.$route.query.id,
-        },
         tableData: [],
         totalPages: 0,
         selectInput: '',               // 默认全部评论
@@ -134,7 +126,6 @@
         replyInput: '1',
         quickphrasesInput: null,
         quickphrases_list: [],
-        replyBoxStatus: false,
         replyUserName: '',
         replytextarea: '',
         replyid: '',
@@ -154,7 +145,8 @@
         from_uid: 0,
         to_uid: 0,
         dialogStatusGoods: false,
-        goods_id: 0
+        goods_id: 0,
+        seller_id: 0
       }
     },
     created() {
@@ -172,7 +164,7 @@
         // 初始化用户每页20
         const params = {
           size: 20,
-          receiver: this.query.id
+          receiver: this.user_id
         }
         if(obj){
           $.extend(params, obj)
@@ -180,6 +172,8 @@
         comment_list(params).then((res) => {
           that.tableData = res.result;
           that.totalPages = res.totalPages*10;
+          // 获取黑市卖家id
+          that.seller_id = res.result[0].to_uid;
         })
       },
       //分页
@@ -200,17 +194,30 @@
         }
         this.initCommentList(obj);
       },
-      // 打开模态框显示某个用户的历史会话
-      openDialog(id) {
+      // 打开模态框显示某个用户的历史会话 同时标记已读
+      openDialog(id, index) {
         const that = this;
         this.dialogStatus = true;
         history_comment(id).then((res) => {
           that.comment_list = res;
+          // 获取 买家向卖家的对话id
+          $.each(res, (i, item) => {
+            if(item.to_uid == that.seller_id){
+              that.replyUserName = res[i]['from_nickname'];
+              that.replyid = res[i]['id'];
+              return false;
+            }
+          })
+        })
+        const obj = {
+          ids: [id]
+        }
+        read_comment(obj).then((res) => {
+          that.tableData[index].status = 0;
         })
       },
       // 展开回复
       addReplyUser(from_nickname, id) {
-        this.replyBoxStatus = true;
         this.replyUserName = from_nickname;
         this.replyid = id;
       },
@@ -243,7 +250,6 @@
       // 关闭模态框回调
       dialogClose() {
         //重置状态
-        this.replyBoxStatus = false;
         this.replyUserName = '';
         this.replytextarea = '';
         this.replyid = '';
@@ -252,6 +258,7 @@
       handleSelectionChange(val){
         this.read_comment = val;
       },
+      // 批量标记
       add_read() {
         const that = this;
         if(this.read_comment.length){
@@ -298,29 +305,11 @@
         this.dialogStatusGoods = true;
         this.goods_id = id;
       }
-      // 删除评论
-      // deleteComment(id, index) {
-      //   const that = this;
-      //   this.$confirm('是否删除该评论, 是否继续?', '提示', {
-      //     confirmButtonText: '确定',
-      //     cancelButtonText: '取消',
-      //     type: 'warning'
-      //   }).then(() => {
-      //     delete_comment(id).then((res) => {
-      //       that.$message({
-      //         message: '删除成功',
-      //         type: 'success'
-      //       });
-      //       that.tableData[index]['type'] = 14;
-      //     })
-      //   }).catch(() => {});
-      // }
     }
   };
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>
   .comment_list{
-    padding: 20px;
     position: relative;
     .search{
       text-align: center;
@@ -331,7 +320,7 @@
     }
     .add_read{
       position: absolute;
-      top: 20px;
+      top: 0;
     }
     .query_goods{
       cursor: pointer;
@@ -377,6 +366,8 @@
     .comment_box{
       height: 500px;
       overflow-y: auto;
+      border-radius: 4px;
+      background-color: #f5f5f5;
     }
     .upload{
       text-align: left;
@@ -386,6 +377,45 @@
     }
     .reply{
       margin-top: 10px;
+    }
+    .comments_list{
+      line-height: 32px;
+      margin: 5px 0;
+      padding: 5px 5px;
+      .content{
+        display: inline-block;
+        vertical-align: top;
+        padding: 0 5px;
+        border: 1px solid #ededed;
+        border-radius: 4px;
+        img{
+          width: 100%;
+        }
+      }
+      .time{
+        display: block;
+        text-align: center;
+        b{
+          font-size: 12px;
+          padding: 3px;
+          background-color: #dadada;
+          color: white;
+          border-radius: 2px;
+        }
+      }
+      .user{
+        img{
+          width: 32px;
+          border-radius: 3px;
+        }
+      }
+    }
+    .seller_user{
+      text-align: right;
+      .content{
+        background-color: rgba(158, 234, 106, 0.8);
+        border-color: rgba(158, 234, 106, 0.8);
+      }
     }
   }
 </style>

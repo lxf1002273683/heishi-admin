@@ -128,7 +128,7 @@ export function add_request(form) {
     }
   });
 }
-
+// 入库申请列表
 export function request_list(form) {
   return fetch({
     url: '/warehouse/api/v1/warehousing/requests',
@@ -137,11 +137,36 @@ export function request_list(form) {
   });
 }
 
+// 删除入库申请
+export function delete_requests(id) {
+  return fetch({
+    url: '/warehouse/api/v1/warehousing/request/' + id,
+    method: 'delete'
+  });
+}
+
 // 查看具体的入库详情
 export function request_info(id) {
   return fetch({
     url: '/warehouse/api/v1/warehousing/batch/' + id,
     method: 'get'
+  });
+}
+
+// 修正某一会计审核未通过的入库申请子批次
+export function update_requset(id, form) {
+  return fetch({
+    url: '/warehouse/api/v1/warehousing/batch/' + id + '/update',
+    method: 'post',
+    data: form
+  });
+}
+
+// 重新将未通过会计审核的入库申请置为待审核状态
+export function resubmit_requset(id) {
+  return fetch({
+    url: '/warehouse/api/v1/warehousing/request/' + id + '/resubmit',
+    method: 'post'
   });
 }
 

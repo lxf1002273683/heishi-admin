@@ -92,6 +92,8 @@ const permission = {
             accessedRouters = filterAsyncRouter(asyncRouterMap, [1, 4, 8, 256]);
             commitResolve();
           })
+          // accessedRouters = filterAsyncRouter(asyncRouterMap, [1, 4, 8, 256]);
+          // commitResolve();
           // accessedRouters = filterAsyncRouter(asyncRouterMap, [1, 4, 8]);
           // commitResolve();
         }

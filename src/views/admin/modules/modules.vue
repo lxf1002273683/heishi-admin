@@ -1,11 +1,5 @@
 <template>
   <div class="app-container">
-    <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
-      <el-menu-item index="1">模块列表</el-menu-item>
-      <router-link to="/admin/add_module">
-        <el-menu-item index="2">创建模块</el-menu-item>
-      </router-link>
-    </el-menu>
     <div class="tableData">
       <el-table :data="tableData" style="width: 100%" stripe border v-loading.body="listLoading" element-loading-text="拼命加载中" fit highlight-current-row>
         <el-table-column prop="name" label="模块" width="180">
@@ -33,10 +27,8 @@
 <script>
   import { modules_list, update_module } from '@/api/admin';
   export default {
-    name: 'modules',
     data() {
       return {
-        activeIndex: '1',
         listLoading: true,
         inputstatus: null,
         tableData: []
@@ -82,7 +74,6 @@
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>
   .tableData{
-    padding: 20px;
     .hiddenbox{
       display: block;
     }

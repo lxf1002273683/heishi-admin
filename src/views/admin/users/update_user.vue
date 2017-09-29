@@ -1,17 +1,5 @@
 <template>
     <div class="app-container">
-      <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
-        <router-link to="/admin/users">
-          <el-menu-item index="1">用户列表</el-menu-item>
-        </router-link>
-        <router-link to="/admin/add_user">
-          <el-menu-item index="2">创建用户</el-menu-item>
-        </router-link>
-        <el-menu-item index="3">修改用户</el-menu-item>
-        <router-link to="/admin/module_privilege">
-          <el-menu-item index="4">权限配置</el-menu-item>
-        </router-link>
-      </el-menu>
       <el-form autoComplete="on" ref="addForm" :model="addForm" label-width="80px" class="addform">
           <el-form-item label="用户名">
             <el-select class="select" v-model="userid" filterable remote placeholder="请输入修改用户" :remote-method="remoteMethod" :loading="loading">
@@ -93,7 +81,6 @@
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>
   .addform{
-    padding: 20px;
     .el-input{
       width: 240px;
     }

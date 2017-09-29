@@ -1,3 +1,4 @@
+<!-- spu列表 -->
 <template>
   <div class="app-container">
     <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
@@ -45,7 +46,7 @@
         <el-table-column label="操作" width="100">
           <template scope="scope">
             <el-input v-model="scope.row.id" type="hidden" class="hiddenbox"></el-input>
-            <el-button size="small" type="primary" @click="compileModule(scope.$index)" class="queryRequest">
+            <el-button size="small" @click="compileModule(scope.$index)" class="queryRequest">
               <span v-if="inputstatus != scope.$index">编辑SkU</span>
               <span v-else="inputstatus != scope.$index">确认修改</span>
             </el-button>

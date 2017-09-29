@@ -1,11 +1,6 @@
+<!-- 创建仓库 -->
 <template>
   <div class="app-container">
-    <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
-      <router-link to="/warehouse/warehouses">
-        <el-menu-item index="1">仓库列表</el-menu-item>
-      </router-link>
-      <el-menu-item index="2">创建仓库</el-menu-item>
-    </el-menu>
     <div class="goodsAddForm">
       <el-form label-width="80px" :model="addForm" ref="addForm" :rules="rules">
         <el-form-item label="仓库名称" prop="name">
@@ -33,7 +28,6 @@
   export default {
     data() {
       return {
-        activeIndex: '2',
         addForm: {
           name: '',
           memo: '',
@@ -72,7 +66,6 @@
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>
   .goodsAddForm{
-    padding: 20px;
     .el-input{
       width: 240px;
     }
