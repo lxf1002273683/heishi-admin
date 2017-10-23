@@ -3,23 +3,21 @@
   <div class="app-container">
     <div class="spus_list">
       <div class="search">
-        <el-input placeholder="请输入查询的分类" v-model="searchInputCategory" class="searchInput">
-        </el-input>
-        <el-input placeholder="请输入查询的店铺" v-model="searchInputShop" class="searchInput">
-          <el-button slot="append" icon="search" v-on:click="handleIconClick"></el-button>
-        </el-input>
+        <el-input placeholder="请输入查询的商品名称" v-model="searchInputName" class="searchInput" @change="changeSearch"></el-input>
+        <el-input placeholder="请输入查询的分类" v-model="searchInputCategory" class="searchInput" @change="changeSearch"></el-input>
+        <el-input placeholder="请输入查询的店铺" v-model="searchInputShop" class="searchInput" @change="changeSearch"></el-input>
       </div>
-      <el-table :data="tableData" style="width: 100%" stripe border >
-        <el-table-column prop="category_name" label="分类" width="120">
-        </el-table-column>
-        <el-table-column prop="shop_name" label="店铺">
-        </el-table-column>
-        <el-table-column prop="name" label="名称">
+      <el-button type="primary" class="add_warehouse" @click="add_warehouse">添至库房</el-button>
+      <el-table :data="tableData" style="width: 100%" stripe border @selection-change="handleSelectionChange" ref="multipleTable" v-loading.body="listLoading" element-loading-text="拼命加载中">
+        <el-table-column type="selection" width="45"></el-table-column>
+        <el-table-column prop="name" label="商品名称" width="120">
           <template scope="scope">
             <span v-if="inputstatus != scope.$index">{{scope.row.name}}</span>
             <el-input v-model="scope.row.name" v-if="inputstatus == scope.$index"></el-input>
           </template>
         </el-table-column>
+        <el-table-column prop="category_name" label="分类"></el-table-column>
+        <el-table-column prop="shop_name" label="店铺"></el-table-column>
         <el-table-column prop="short_name" label="简称">
           <template scope="scope">
             <span v-if="inputstatus != scope.$index">{{scope.row.short_name}}</span>
@@ -35,7 +33,7 @@
         <el-table-column prop="image" label="图片" width="180">
           <template scope="scope">
             <img :src="scope.row.image" v-if="inputstatus != scope.$index">
-            <el-upload :headers="header" :action="action" list-type="picture-card" :on-success="handleSuccess" :show-file-list="false" v-if="inputstatus == scope.$index">
+            <el-upload  class="upload" :headers="header" :action="action" list-type="picture-card" :on-success="handleSuccess" :show-file-list="false" v-if="inputstatus == scope.$index" :on-error="uploadError">
               <img v-if="imageUrl" :src="imageUrl" class="imageUrl">
               <i v-else class="el-icon-plus avatar-uploader-icon"></i>
             </el-upload>
@@ -54,7 +52,7 @@
             <el-input v-model="scope.row.memo" v-if="inputstatus == scope.$index"></el-input>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="100">
+        <el-table-column label="操作" width="110">
           <template scope="scope">
             <el-input v-model="scope.row.id" type="hidden" class="hiddenbox"></el-input>
             <el-button size="small" @click="compileModule(scope.$index)" class="operation">
@@ -88,25 +86,38 @@
         <el-button type="primary" @click="insertSku">确 定</el-button>
       </div>
     </el-dialog>
-    <el-dialog :title="querySkudialogTitle" :visible.sync="querySkudialogStatus" top="15%">
-      <div>
-        <el-table :data="skuData" style="width: 100%" stripe border >
-          <el-table-column prop="type" label="款式名称"></el-table-column>
-          <el-table-column prop="desc" label="描述"></el-table-column>
-          <el-table-column prop="price" label="价格"></el-table-column>
-        </el-table>
-      </div>
+    <el-dialog title="SKU列表" :visible.sync="querySkudialogStatus" top="15%" size="large" @close="skuDialogClose">
+      <Skus :sku_id="search_sku_id" :status="skuDialogStatus"></Skus>
+    </el-dialog>
+    <el-dialog title="添至库房" :visible.sync="dialogWarehouseStatus" size="tiny">
+      <template>
+        <el-checkbox-group v-model="checkList">
+          <template v-for="item in warehouseList">
+            <el-checkbox :label="item.id">{{item.name}}</el-checkbox>
+          </template>
+        </el-checkbox-group>
+      </template>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogWarehouseStatus = false">取 消</el-button>
+        <el-button type="primary" @click="addWarehouse">确 定</el-button>
+      </span>
     </el-dialog>
   </div>
 </template>
 
 <script>
-  import { spus_list, update_spus, add_skus, skus_list } from '@/api/goods';
+  import { spus_list, update_spus, add_skus, spus_warehouses } from '@/api/goods';
   import { getToken } from '@/utils/auth';
+  import { warehouse_list } from '@/api/warehouse';
+  import Skus from './skus';
 
   export default {
+    components: {
+      Skus
+    },
     data() {
       return {
+        searchInputName: '',
         searchInputCategory: '', // 搜索店铺
         searchInputShop: '', // 搜索分类
         tableData: [],
@@ -129,13 +140,21 @@
         },
         // 查询sku
         querySkudialogStatus: false,
-        skuData: [],
-        querySkudialogTitle: ''
+        search_sku_id: 0,
+        skuDialogStatus: false,
+        // 添加到仓库
+        multipleSelection: [],
+        dialogWarehouseStatus: false,
+        checkList: [],
+        warehouseList: [],
+        listLoading: true
       }
     },
     created() {
-      // 获取现有的分类
+      // 获取现有的spu
       this.initSpusList();
+      // 初始化仓库列表
+      this.getWarehouses();
     },
     methods: {
       // 修改spu部分信息
@@ -182,13 +201,15 @@
         const obj = {
           page: val,
           category_name: this.searchInputCategory,
+          name: this.searchInputName,
           shop_name: this.searchInputShop
         }
         this.initSpusList(obj);
       },
       // 店铺搜索
-      handleIconClick() {
+      changeSearch() {
         const obj = {
+          name: this.searchInputName,
           shop_name: this.searchInputShop,
           category_name: this.searchInputCategory
         }
@@ -232,15 +253,9 @@
       },
       // 查询当前spu对象的所有sku
       querySkus(id) {
-        const obj = {
-          spu_id: id
-        }
-        const that = this;
-        skus_list(obj).then((res) => {
-          that.skuData = res.result;
-          that.querySkudialogTitle = res.result[0]['spu_name'];
-        })
+        this.search_sku_id = id;
         this.querySkudialogStatus = true;
+        this.skuDialogStatus = true;
       },
       // 获取spu列表
       initSpusList(obj) {
@@ -249,22 +264,79 @@
         if(obj){
           $.extend(params, obj)
         }
+        that.listLoading = true;
         spus_list(params).then((res) => {
           that.tableData = res.result;
           // 重置totalPages 计算是否有分页
           that.totalPages = res.totalPages*10;
+          that.listLoading = false;
         })
+      },
+      // sku模态窗关闭回调
+      skuDialogClose() {
+        this.skuDialogStatus = false;
+      },
+      // 表格选择变化监听复制
+      handleSelectionChange(val) {
+        this.multipleSelection = val;
+      },
+      // 点击 添至库房 进行仓库选择
+      add_warehouse() {
+        if(this.multipleSelection.length){
+          this.dialogWarehouseStatus = true;
+        }else{
+          this.$message({
+            message: '请先选择要添加的SKU',
+            type: 'error'
+          });
+        }
+      },
+      // 初始化仓库列表
+      getWarehouses() {
+        const that = this;
+        warehouse_list().then((res) => {
+          that.warehouseList = res.data;
+        })
+      },
+      // 批量添加sku到仓库
+      addWarehouse() {
+        const warehouse_ids = this.checkList;
+        const spu_ids = [];
+        const that = this;
+        $.each(this.multipleSelection, function(i, item){
+          spu_ids.push(item.id);
+        })
+        const obj = {
+          warehouse_id: warehouse_ids.toString(),
+          spu_id: spu_ids.toString()
+        }
+        spus_warehouses(obj).then((res) => {
+          that.$message({
+            message: '添加成功',
+            type: 'success'
+          });
+          that.dialogWarehouseStatus = false;
+          that.$refs.multipleTable.clearSelection();
+        })
+      },
+      // 图片上传失败
+      uploadError(error) {
+        this.$message({
+          message: '上传失败,请重新登录尝试',
+          type: 'error'
+        });
       }
     }
   };
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>
   .spus_list{
+    position: relative;
     .search{
+      text-align: center;
       .searchInput{
-        float: left;
-        width: 240px;
-        padding: 0 0 20px ;
+        width: 180px;
+        padding: 0 0 20px;
       }
     }
     img{
@@ -292,6 +364,10 @@
     }
     .operation{
       margin: 3px 0;
+    }
+    .add_warehouse{
+      position: absolute;
+      top: 0;
     }
   }
 </style>

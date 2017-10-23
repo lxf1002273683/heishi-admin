@@ -1,21 +1,41 @@
 import fetch from '@/utils/fetch';
 
-// 仓库创建修改
-export function add_warehouse(form) {
+// 创建文章
+export function add_article(form) {
   return fetch({
-    url: '/warehouse/api/v1/warehouse',
+    url: '/warehouse/api/v1/posts',
     method: 'post',
     data: form
   });
 }
 
-export function warehouse_list() {
+// 查询文章
+export function article_list(form) {
   return fetch({
-    url: '/warehouse/api/v1/warehouses',
+    url: '/warehouse/api/v1/posts',
+    method: 'get',
+    params: form
+  });
+}
+
+// 查询商品
+export function query_goods(id) {
+  return fetch({
+    url: '/warehouse/api/v1/posts/' + id,
     method: 'get'
   });
 }
 
+// 修改商品库存
+export function update_stock(id, skuList) {
+  return fetch({
+    url: '/warehouse/api/v1/posts/' + id,
+    method: 'post',
+    data: {
+      skus: skuList
+    }
+  });
+}
 export function update_warehouse(id, form) {
   return fetch({
     url: '/warehouse/api/v1/warehouse/' + id,

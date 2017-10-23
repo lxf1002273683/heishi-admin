@@ -12,14 +12,14 @@
         <el-input v-model="batchOptions" placeholder="请输入查询的子批次号ID" class="searchInput"></el-input>
         <el-button v-on:click="handleIconClick" type="primary">搜索</el-button>
       </div>
-      <el-table :data="tableData" style="width: 100%" stripe border >
-        <el-table-column prop="batch_id" label="ID" width="60"></el-table-column>
+      <el-table :data="tableData" style="width: 100%" stripe border v-loading.body="listLoading" element-loading-text="拼命加载中">
+        <el-table-column prop="batch_id" label="子批次ID" width="95"></el-table-column>
         <el-table-column prop="sku.spu.name" label="商品名称" width="120"></el-table-column>
         <el-table-column prop="sku.type" label="款式"></el-table-column>
         <el-table-column prop="user.account" label="操作用户"></el-table-column>
         <el-table-column label="库存变化">
           <template scope="scope">
-            <span v-if="scope.row.increment_quantity > 0" style="color: #20a0ff;">{{scope.row.increment_quantity}}</span>
+            <span v-if="scope.row.increment_quantity > 0" style="color: #20a0ff;">+{{scope.row.increment_quantity}}</span>
             <span v-if="scope.row.increment_quantity < 0" style="color: red;">{{scope.row.increment_quantity}}</span>
           </template>
         </el-table-column>
@@ -78,7 +78,8 @@
         dialogStatus: false,
         batchDetails: {
           id: null
-        }
+        },
+        listLoading: true
       }
     },
     created() {
@@ -102,14 +103,15 @@
         if(obj){
           $.extend(params, obj)
         }
+        that.listLoading = true;
         stocklogs(params).then((res) => {
           that.totalPages = res.total;
           that.tableData = res.data;
+          that.listLoading = false;
         })
       },
       // 分页
       handleCurrentChange(val) {
-        console.log(val);
         const obj = {
           page: val
         }

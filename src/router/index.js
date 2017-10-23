@@ -39,7 +39,7 @@ const BusinessModules = _import('business/module_privilege');
 /* 商品库 -- spu */
 const SpusTpl = _import('goods/spus_tpl');
 /* 商品库 -- sku */
-const Skus = _import('goods/skus');
+// const Skus = _import('goods/skus');
 /* 商品库 -- 入库申请 */
 const RequestTpl = _import('goods/request_tpl');
 
@@ -52,19 +52,16 @@ const WarehouseTpl = _import('warehouse/warehouse_tpl');
 
 
 /* 我的商品 */
-const Articles = _import('articles/index');
+const ArticleTpl = _import('articles/article_tpl');
 
 /* 我的评论 */
 const CommentsTpl = _import('comments/comments_tpl');
 
 /* 我的订单 */
-const Orders = _import('orders/index');
+const OrdersTpl = _import('orders/orders_tpl');
 
 /* 我的账户 */
 const Account = _import('account/index');
-
-/* 发布商品 */
-const Release = _import('articles/release');
 
 /* 财务管理 */
 const Finance = _import('finance/index');
@@ -126,7 +123,7 @@ export const asyncRouterMap = [
     meta: { role: [4] },
     children: [
       { path: 'spus', component: SpusTpl, name: 'SPU列表' },
-      { path: 'skus', component: Skus, name: 'SKU列表' },
+      // { path: 'skus', component: Skus, name: 'SKU列表' },
       { path: 'requests', component: RequestTpl, name: '入库申请' }
     ]
   },
@@ -171,9 +168,7 @@ export function modulesConfig(userIds) {
     redirect: 'noredirect',
     name: '我的商品',
     meta: { role: [16] },
-    children: [
-      { path: 'release', component: Release, name: '发布商品', hidden: true }
-    ]
+    children: []
   }
   // 我的评论
   const comments = {
@@ -205,7 +200,7 @@ export function modulesConfig(userIds) {
   for (let x = 0; x < userIds.length; x++) {
     const articlesTemplate = {
       path: 'articles/' + userIds[x].userId,
-      component: Articles,
+      component: ArticleTpl,
       name: userIds[x].userName,
       id: userIds[x].userId,
       userName: userIds[x].userName
@@ -219,7 +214,7 @@ export function modulesConfig(userIds) {
     };
     const ordersTemplate = {
       path: 'orders/' + userIds[x].userId,
-      component: Orders,
+      component: OrdersTpl,
       name: userIds[x].userName,
       id: userIds[x].userId,
       userName: userIds[x].userName

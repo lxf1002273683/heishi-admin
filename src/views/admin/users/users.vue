@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <div class="tableData" v-if="activeIndex == '/admin/users'">
-      <el-table :data="tableData" style="width: 100%" stripe border >
+      <el-table :data="tableData" style="width: 100%" stripe border v-loading.body="listLoading" element-loading-text="拼命加载中">
         <el-table-column prop="account" label="用户名">
         </el-table-column>
         <el-table-column prop="avatar" label="头像">
@@ -47,29 +47,29 @@
         activeIndex: '/admin/users',
         tableData: [],
         roles: ['管理员', '大帐号', '假帐号', '大卖家', '业务帐号', '其他卖家'],
-        totalPages: 0
+        totalPages: 0,
+        listLoading: true
       }
     },
     created () {
-      const that = this
-      that.getUsersList().then((res)=>{
-        that.tableData = res.results;
-        that.totalPages = res.totalPages*10;
-      })
+      this.getUsersList();
     },
     methods: {
       handleCurrentChange(val) {
-        const that = this
         const obj = {
           page: val
         }
-        that.getUsersList(obj).then((res)=>{
-          that.tableData = res.results;
-        })
+        this.getUsersList(obj);
       },
       getUsersList(obj) {
         const params = obj ? obj : {};
-        return users_list(params);
+        const that = this;
+        this.listLoading = true;
+        users_list(params).then((res) => {
+          that.tableData = res.results;
+          that.totalPages = res.totalPages*10;
+          that.listLoading = false;
+        })
       },
       // 切换nav
       select(key) {

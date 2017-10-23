@@ -64,4 +64,18 @@ a:hover {
   fill: currentColor;
   overflow: hidden;
 }
-
+//设置上传框样式
+.upload .el-upload{
+  height: auto;
+  min-height: 148px;
+  width: auto;
+  min-width: 148px;
+  max-width: 560px;
+}
+//步骤条 宽度限制
+.el-step__description{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 370px;
+}

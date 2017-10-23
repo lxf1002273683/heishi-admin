@@ -123,7 +123,6 @@
       getModuleList() {
         const that = this
         modules_list().then((res) => {
-          console.log(res);
           that.checkDate = res;
         })
       },

@@ -64,12 +64,13 @@ module.exports = {
         }
       }
     ]
-  },
-  plugins: [
-    // 添加jquery 方便使用依赖jquery的第三方库
-    new webpack.ProvidePlugin({
-      $: 'jquery',
-      jQuery: 'jquery'
-    })
-  ]
+  }
+  // 使用cdn引用jquery
+  // plugins: [
+  //   // 添加jquery 方便使用依赖jquery的第三方库
+  //   new webpack.ProvidePlugin({
+  //     $: 'jquery',
+  //     jQuery: 'jquery'
+  //   })
+  // ]
 }

@@ -20,7 +20,7 @@
             <div class="modules">选择模块</div>
             <template v-for="item in checkDate">
               <!-- 只显示大帐号中的业务模块 -->
-              <el-checkbox :label="item.id" v-if="item.privilege != 2 && item.privilege != 4 && item.privilege != 8">{{item.name}}</el-checkbox>
+              <el-checkbox :label="item.id" v-if="item.privilege != 2 && item.privilege != 4 && item.privilege != 8 && item.privilege != 256">{{item.name}}</el-checkbox>
             </template>
           </el-checkbox-group>
           <el-form-item class="el-btn">

@@ -7,7 +7,7 @@
         <span class="svg-container">
                   <icon-svg icon-class="jiedianyoujian"></icon-svg>
                 </span>
-        <el-input name="account" type="text" v-model="loginForm.account" autoComplete="on" placeholder="用户名"></el-input>
+        <el-input name="account" type="text" v-model="loginForm.account" autoComplete="on" placeholder="用户名" @keyup.enter.native="handleLogin"></el-input>
       </el-form-item>
       <el-form-item prop="password">
         <span class="svg-container">

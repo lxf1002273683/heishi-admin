@@ -27,6 +27,14 @@ export function users_list(from) {
 }
 
 // 修改用户信息
+export function get_user_info(id) {
+  return fetch({
+    url: '/warehouse/api/v1/users/' + id,
+    method: 'get'
+  });
+}
+
+// 修改用户信息
 export function update_user(id, from) {
   return fetch({
     url: '/warehouse/api/v1/users/' + id,
