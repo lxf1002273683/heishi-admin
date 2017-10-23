@@ -5,7 +5,7 @@
       <el-menu-item index="2">增加邮费列表</el-menu-item>
     </el-menu>
     <div class="request_list" v-if="activeIndex == 1">
-      <el-collapse v-model="activeNames">
+      <el-collapse v-model="activeNames" v-loading.body="listLoadingRequest" element-loading-text="拼命加载中">
         <template v-for="(item, index) in tableData">
           <el-collapse-item :title="item.batch_number" :name="item.id">
             <template slot="title">
@@ -32,10 +32,11 @@
       </el-pagination>
     </div>
     <div class="postage_list" v-if="activeIndex == 2">
-      <el-table :data="postageList" style="width: 100%" stripe border >
+      <el-table :data="postageList" style="width: 100%" stripe border v-loading.body="listLoadingPostage" element-loading-text="拼命加载中">
+        <el-table-column prop="batch_id" label="子批次ID" width='95'></el-table-column>
         <el-table-column prop="user_name" label="申请用户"></el-table-column>
         <el-table-column prop="batch_number" label="批次号"></el-table-column>
-        <el-table-column prop="warehouse_batch.warehouse_id" label="仓库"></el-table-column>
+        <el-table-column prop="warehouse_name" label="仓库"></el-table-column>
         <el-table-column prop="sku_name" label="商品名称"></el-table-column>
         <el-table-column prop="sku_type" label="款式"></el-table-column>
         <el-table-column prop="price" label="邮费金额/数量">
@@ -68,7 +69,9 @@
         tableData: [],
         postageList: [],
         totalPages: 0,
-        totalPostagePages: 0
+        totalPostagePages: 0,
+        listLoadingRequest: true,
+        listLoadingPostage: true
       }
     },
     created() {
@@ -87,9 +90,11 @@
         if(obj){
           $.extend(params, obj)
         }
+        that.listLoadingRequest = true;
         request_list(params).then((res) => {
           that.tableData = res.data;
           that.totalPages = res.total;
+          that.listLoadingRequest = false;
         })
       },
       // 获取待审核邮费列表
@@ -101,9 +106,11 @@
         if(obj){
           $.extend(params, obj)
         }
+        that.listLoadingPostage = true;
         payments_list(params).then((res) => {
           that.postageList = res.data;
           that.totalPostagePages = res.total;
+          that.listLoadingPostage = false;
         })
       },
       // 同意
@@ -116,7 +123,6 @@
         }).then(() => {
           const obj = {};
           obj.is_pass = 1;
-          obj.index = index;
           if(that.activeIndex == 2){
             obj['id'] = batch_number;
             that.passPayments(obj);
@@ -136,7 +142,6 @@
         }).then(() => {
           const obj = {};
           obj.is_pass = 0;
-          obj.index = index;
           if(that.activeIndex == 2){
             obj['id'] = batch_number;
             that.passPayments(obj);

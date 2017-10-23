@@ -25,7 +25,7 @@
         </el-form-item>
         <el-form-item label="图片" prop="image">
           <el-input v-model="addForm.image" class="image_box"></el-input>
-          <el-upload :headers="header" :action="action" list-type="picture-card" :on-success="handleSuccess" :show-file-list="false">
+          <el-upload :headers="header" :action="action" list-type="picture-card" :on-success="handleSuccess" :show-file-list="false" class="upload" :on-error="uploadError">
             <img v-if="imageUrl" :src="imageUrl" class="avatar">
             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
           </el-upload>
@@ -36,9 +36,9 @@
         <el-form-item label="备注" prop="memo">
           <el-input v-model="addForm.memo"></el-input>
         </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="createSpu">立即创建</el-button>
-          </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="createSpu">立即创建</el-button>
+        </el-form-item>
       </el-form>
     </div>
   </div>
@@ -84,7 +84,7 @@
         header: {
           Authorization: getToken()
         },
-        // 图片是否可以上传 false可上传 true禁止上传
+        // 图片是否可以上传
         imageUrl: ''
       }
     },
@@ -145,6 +145,13 @@
       handleSuccess(res, file) {
         this.addForm.image = res.uri;
         this.imageUrl = URL.createObjectURL(file.raw);
+      },
+      // 图片上传失败
+      uploadError(error) {
+        this.$message({
+          message: '上传失败,请重新登录尝试',
+          type: 'error'
+        });
       }
     }
   }
@@ -165,8 +172,7 @@
       width: 240px;
     }
     .avatar{
-      width: 100%;
-      height: 100%;
+      display: block;
     }
   }
 </style>

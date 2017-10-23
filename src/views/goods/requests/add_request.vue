@@ -180,6 +180,7 @@
           });
           that.addTable = [];
           that.memo = '';
+          that.warehouse_status = false;
         },() => {
           that.$message({
             message: '创建失败',

@@ -10,12 +10,16 @@
             </el-option>
           </el-select>
       </div>
-      <el-collapse v-model="activeNames">
+      <el-collapse v-model="activeNames" v-loading.body="listLoading" element-loading-text="拼命加载中">
         <template v-for="(item, index) in tableData">
           <el-collapse-item :name="item.id">
-            <template slot="title">{{item.batch_number}} <!-- <span>{{item.memo}}</span> --></template>
+            <template slot="title">
+              <span>{{item.batch_number}}</span>
+              <span class="user">申请人 : {{item.requester.account}}</span>
+              <span class="time">{{item.created_at}}</span>
+            </template>
             <el-table :data="item.batches" style="width: 100%" stripe border >
-              <el-table-column prop="id" label="ID" width="60"></el-table-column>
+              <el-table-column prop="id" label="子批次ID" width="95"></el-table-column>
               <el-table-column prop="sku.spu_name" label="商品名称"></el-table-column>
               <el-table-column prop="sku.type" label="款式"></el-table-column>
               <el-table-column prop="purchasing_price" label="商品进价"></el-table-column>
@@ -26,8 +30,8 @@
               <el-table-column label="操作" width="110">
                 <template scope="scope">
                   <!-- 传入单个申请的id，进行具体信息查询 -->
-                  <el-button v-if="scope.row.sale_status == 2" size="small" @click="finishCommodity(scope.row.id,scope.$index,index)">完成入库</el-button>
-                  <el-button v-if="scope.row.sale_status == 2 || scope.row.sale_status == 1" size="small" @click="dialogOpen(scope.row.id,scope.$index,index)">
+                  <el-button v-if="scope.row.sale_status != 0 && scope.row.sale_status != 4 && scope.row.sale_status != 1" size="small" @click="finishCommodity(scope.row.id,scope.$index,index)">完成入库</el-button>
+                  <el-button v-if="scope.row.sale_status != 0 && scope.row.sale_status != 4" size="small" @click="dialogOpen(scope.row.id,scope.$index,index)">
                     部分入库
                   </el-button>
                   <el-button v-if="scope.row.sale_status != 0 && scope.row.sale_status != 4" size="small" @click="presellCommodity(scope.row.id,scope.$index,index)">
@@ -163,7 +167,8 @@
         loading: false,
         skuItems: [],
         // dialog显示状态
-        dialogStatus: false
+        dialogStatus: false,
+        listLoading: true
       }
     },
     created() {
@@ -285,9 +290,11 @@
         if(obj){
           $.extend(params, obj)
         }
+        that.listLoading = true;
         request_list(params).then((res) => {
           that.tableData = res.data;
           that.totalPages = res.total;
+          that.listLoading = false;
         })
       },
       // 预售商品
@@ -355,9 +362,15 @@
         padding: 0 20px 20px 0;
       }
     }
-
     .el-button{
       margin: 3px 0;
+    }
+    .user{
+      margin-left: 20px;
+    }
+    .time{
+      float: right;
+      margin-right: 10px;
     }
   }
   .addForm{

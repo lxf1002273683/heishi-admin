@@ -43,7 +43,6 @@
         let that = this;
         this.$refs.addForm.validate((valid) => {
           if (valid) {
-            console.log(that.addForm)
             add_warehouse(that.addForm).then(() => {
               that.$message({
                 message: '创建成功',

@@ -71,6 +71,7 @@
             left: 0;
             right: -17px;
             overflow-y: scroll;
+            overflow-x: hidden;
         }
         .main-container {
             min-height: 100%;

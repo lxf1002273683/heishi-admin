@@ -2,7 +2,7 @@
 <template>
   <div class="app-container">
     <div class="tableData">
-      <el-table :data="tableData" style="width: 100%" stripe border >
+      <el-table :data="tableData" style="width: 100%" stripe border v-loading.body="listLoading" element-loading-text="拼命加载中">
         <el-table-column prop="account" label="用户名">
         </el-table-column>
         <el-table-column prop="desc" label="desc">
@@ -24,27 +24,27 @@
     data() {
       return {
         tableData: [],
-        totalPages: 0
+        totalPages: 0,
+        listLoading: true
       }
     },
     created () {
-      const that = this;
       // 登录列表初始化
-      that.getLoginsList().then((res)=>{
-        that.tableData = res.results;
-        that.totalPages = res.totalPages*10;
-      })
+      this.getLoginsList()
     },
     methods: {
       handleCurrentChange(val) {
-        const that = this
-        that.getLoginsList(val).then((res)=>{
-          that.tableData = res.results;
-        })
+        this.getLoginsList(val);
       },
       getLoginsList(page) {
+        const that = this;
         const pages = page ? page : 1;
-        return operations(pages);
+        this.listLoading = true;
+        operations(pages).then((res)=>{
+          that.tableData = res.results;
+          that.totalPages = res.totalPages*10;
+          that.listLoading = false;
+        })
       }
     }
   }

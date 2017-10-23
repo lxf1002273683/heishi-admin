@@ -6,14 +6,19 @@
         <span class="search_title">商品查询：</span>
         <el-input v-model="skuOptions" placeholder="请输入查询的商品名称" class="searchInput" @change="selectSku"></el-input>
       </div>
-      <el-table :data="tableData" style="width: 100%" stripe border >
+      <el-table :data="tableData" style="width: 100%" stripe border v-loading.body="listLoading" element-loading-text="拼命加载中">
         <el-table-column prop="spu_name" label="商品名称" width="120"></el-table-column>
         <el-table-column prop="type" label="款式"></el-table-column>
         <el-table-column prop="stock" label="库存"></el-table-column>
         <el-table-column prop="desc" label="备注"></el-table-column>
-        <el-table-column label="操作" width="100">
+        <el-table-column label="进货查询" width="100">
           <template scope="scope">
             <el-button size="small" @click="queryRequest(scope.row.sku_id)">进货历史</el-button>
+          </template>
+        </el-table-column>
+        <el-table-column label="删除" width="80">
+          <template scope="scope">
+            <el-button :plain="true" type="danger" size="small" @click="deleteSku(scope.row.sku_id,scope.$index)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -31,7 +36,7 @@
             <span class="user">申请人：{{item.requester.account}}</span>
           </template>
           <el-table :data="item.batches" style="width: 100%" stripe border >
-            <el-table-column prop="id" label="ID" width="60"></el-table-column>
+            <el-table-column prop="id" label="子批次ID" width="95"></el-table-column>
             <el-table-column prop="sku.spu_name" label="商品名称"></el-table-column>
             <el-table-column prop="sku.type" label="款式"></el-table-column>
             <el-table-column prop="purchasing_price" label="商品进价"></el-table-column>
@@ -56,7 +61,7 @@
   </div>
 </template>
 <script>
-  import { get_skus, stocklogs } from '@/api/warehouse';
+  import { get_skus, stocklogs, delete_skus } from '@/api/warehouse';
   import { request_list } from '@/api/goods';
 
   export default {
@@ -64,7 +69,6 @@
     props: ['warehouse_name', 'warehouse_id'],
     data() {
       return {
-        activeIndex: '1',
         activeNames: '',
         tableData: [],
         totalPages: 0,
@@ -72,7 +76,8 @@
         dialogStatus: false,
         activeNames: '1',
         status: 0,
-        skuOptions: ''
+        skuOptions: '',
+        listLoading: true
       }
     },
     created() {
@@ -85,15 +90,16 @@
         if(obj){
           $.extend(params, obj)
         }
+        that.listLoading = true;
         get_skus(this.warehouse_id, params).then((res) => {
           that.tableData = res.data;
           that.totalPages = res.total;
+          that.listLoading = false;
         })
       },
       // 查询sku对应的入库申请 
       queryRequest(id){
         const that = this;
-        console.log(id);
         const obj = {
           warehouse_id: this.warehouse_id,
           filter: '0,1,2,3',
@@ -127,6 +133,32 @@
           keywords: this.skuOptions
         }
         this.initRequestList(obj);
+      },
+      // 删除已注册sku
+      deleteSku(id, index) {
+        const that = this;
+        const obj = {
+          warehouse_id: this.warehouse_id,
+          sku_id: id
+        }
+        that.$confirm('是否删除', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          delete_skus(obj).then((res) => {
+            that.$message({
+              type: 'success',
+              message: '操作成功'
+            });
+            that.tableData.splice(index, 1);
+          },(error) => {
+            that.$message({
+              type: 'error',
+              message: error.message
+            });
+          })
+        }).catch(() => {});
       }
     }
   };

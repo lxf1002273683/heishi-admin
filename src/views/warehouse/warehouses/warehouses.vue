@@ -2,7 +2,7 @@
 <template>
   <div class="app-container">
     <div class="skus_list">
-      <el-table :data="tableData" style="width: 100%" stripe border >
+      <el-table :data="tableData" style="width: 100%" stripe border v-loading.body="listLoading" element-loading-text="拼命加载中">
         <el-table-column prop="name" label="仓库名称">
           <template scope="scope">
             <span v-if="inputstatus != scope.$index">{{scope.row.name}}</span>
@@ -42,7 +42,8 @@
     data() {
       return {
         tableData: [],
-        inputstatus: null
+        inputstatus: null,
+        listLoading: true
       }
     },
     created() {
@@ -52,8 +53,10 @@
     methods: {
       getWarehouse() {
         const that = this;
+        that.listLoading = true;
         warehouse_list().then((res) => {
           that.tableData = res.data;
+          that.listLoading = false;
         })
       },
       compileModule(index) {

@@ -11,7 +11,7 @@
         </el-form-item>
       </el-form>
       <el-input placeholder="输入关键字进行过滤" v-model="filterText"></el-input>
-      <el-tree :data="data" :props="defaultProps" :filter-node-method="filterNode" ref="tree" :render-content="renderContent" node-key="id" :expand-on-click-node="false" default-expand-all></el-tree>
+      <el-tree :data="data" :props="defaultProps" :filter-node-method="filterNode" ref="tree" :render-content="renderContent" node-key="id" :expand-on-click-node="false" default-expand-all v-loading.body="listLoading" element-loading-text="拼命加载中"></el-tree>
     </div>
   </div>
 </template>
@@ -32,7 +32,8 @@
         defaultProps: {
           children: 'children',
           label: 'label'
-        }
+        },
+        listLoading: true
       }
     },
     created() {
@@ -112,8 +113,10 @@
       updateData() {
         let that = this;
         that.data = [];
+        that.listLoading = true;
         categories_list().then((res) => {
           that.data = classify(res);
+          that.listLoading = false;
         })
       },
       createData(obj) {

@@ -179,6 +179,15 @@ export function skus_warehouses(form) {
   });
 }
 
+// 批量将若干SKU注册到若干仓库中
+export function spus_warehouses(form) {
+  return fetch({
+    url: '/warehouse/api/v1/warehouses/spus',
+    method: 'post',
+    data: form
+  });
+}
+
 // 查询某个仓库所有注册过的sku
 export function skus_warehouses_list(form) {
   return fetch({
@@ -191,15 +200,15 @@ export function skus_warehouses_list(form) {
 // 递归添加数据到树控件中
 export function classify(data) {
   let arr = []
-  for(let i in data){
+  for (let i in data) {
     let obj = {}
-    obj['id'] = data[i]['id'];
-    obj['label'] = data[i]['name'];
-    obj['code'] = data[i]['code'];
-    if(data[i]['children']){
-      obj['children'] = classify(data[i]['children']);
+    obj.id = data[i].id;
+    obj.label = data[i].name;
+    obj.code = data[i].code;
+    if (data[i].children) {
+      obj.children = classify(data[i].children);
       arr.push(obj);
-    }else{
+    } else {
       arr.push(obj);
     }
   }
@@ -209,17 +218,52 @@ export function classify(data) {
 // 递归，变换数据格式添加到选择器
 export function classify_cascader(data) {
   let arr = []
-  for(let i in data){
+  for (let i in data) {
     let obj = {}
-    obj['value'] = data[i]['id'];
-    obj['label'] = data[i]['name'];
-    if(data[i]['children']){
-      obj['children'] = classify_cascader(data[i]['children']);
+    obj.value = data[i].id;
+    obj.label = data[i].name;
+    if (data[i].children) {
+      obj.children = classify_cascader(data[i].children);
       arr.push(obj);
-    }else{
+    } else {
       arr.push(obj);
     }
   }
   return arr;
 }
+// 递归添加数据到树控件中
+// export function classify(data) {
+//   let arr = []
+//   for(let i in data){
+//     let obj = {}
+//     obj['id'] = data[i]['id'];
+//     obj['label'] = data[i]['name'];
+//     obj['code'] = data[i]['code'];
+//     if(data[i]['children']){
+//       obj['children'] = classify(data[i]['children']);
+//       arr.push(obj);
+//     }else{
+//       arr.push(obj);
+//     }
+//   }
+//   return arr;
+// }
+
+// 递归，变换数据格式添加到选择器
+// export function classify_cascader(data) {
+//   let arr = []
+//   for(let i in data){
+//     let obj = {}
+//     obj['value'] = data[i]['id'];
+//     obj['label'] = data[i]['name'];
+//     if(data[i]['children']){
+//       obj['children'] = classify_cascader(data[i]['children']);
+//       arr.push(obj);
+//     }else{
+//       arr.push(obj);
+//     }
+//   }
+//   return arr;
+// }
+
 

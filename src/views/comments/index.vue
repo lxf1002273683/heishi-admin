@@ -13,7 +13,7 @@
         </el-select>
       </div>
       <el-button type="primary" class="add_read" @click="add_read">标记已读</el-button>
-      <el-table :data="tableData" style="width: 100%" stripe border @selection-change="handleSelectionChange" ref="multipleTable">
+      <el-table :data="tableData" style="width: 100%" stripe border @selection-change="handleSelectionChange" ref="multipleTable" v-loading.body="listLoading" element-loading-text="拼命加载中">
         <el-table-column type="selection" width="45">
         </el-table-column>
         <el-table-column label="商品">
@@ -65,7 +65,7 @@
             </template>
           </el-select>
           <el-input  class="textarea" type="textarea" :rows="2" placeholder="请输入内容" v-model="replytextarea" v-if="replyInput == 1"></el-input>
-          <el-upload class="upload" :headers="header" :action="action" list-type="picture-card" :on-success="handleSuccess" :show-file-list="false" v-if="replyInput == 2">
+          <el-upload class="upload" :headers="header" :action="action" list-type="picture-card" :on-success="handleSuccess" :show-file-list="false" v-if="replyInput == 2" :on-error="uploadError">
             <img v-if="imageUrl" :src="imageUrl" class="avatar">
             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
           </el-upload>
@@ -146,7 +146,8 @@
         to_uid: 0,
         dialogStatusGoods: false,
         goods_id: 0,
-        seller_id: 0
+        seller_id: 0,
+        listLoading: true
       }
     },
     created() {
@@ -169,11 +170,13 @@
         if(obj){
           $.extend(params, obj)
         }
+        that.listLoading = true;
         comment_list(params).then((res) => {
           that.tableData = res.result;
           that.totalPages = res.totalPages*10;
           // 获取黑市卖家id
           that.seller_id = res.result[0].to_uid;
+          that.listLoading = false;
         })
       },
       //分页
@@ -304,6 +307,13 @@
       query_goods(id) {
         this.dialogStatusGoods = true;
         this.goods_id = id;
+      },
+      // 图片上传失败
+      uploadError(error) {
+        this.$message({
+          message: '上传失败,请重新登录尝试',
+          type: 'error'
+        });
       }
     }
   };
@@ -373,6 +383,7 @@
       text-align: left;
       img{
         width: 100%;
+        display: block;
       }
     }
     .reply{
