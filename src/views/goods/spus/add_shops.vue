@@ -117,5 +117,11 @@
     .el-form-item__label{
       width: 120px;
     }
+    .el-tree{
+      /*火狐兼容问题*/
+      span{
+        white-space: normal;
+      }
+    }
   }
 </style>

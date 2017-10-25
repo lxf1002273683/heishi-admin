@@ -79,3 +79,18 @@ a:hover {
   text-overflow: ellipsis;
   max-width: 370px;
 }
+//table 
+.el-table .info-row {
+  background: #50bfff;
+}
+
+.el-table .success-row {
+  background: #13ce66;
+}
+.el-table .warning-row {
+  background: #f7ba2a;
+}
+
+.el-table .danger-row {
+  background: #ff4949;
+}

@@ -27,7 +27,7 @@ export function query_goods(id) {
 }
 
 // 修改商品库存
-export function update_stock(id, skuList) {
+export function update_type(id, skuList) {
   return fetch({
     url: '/warehouse/api/v1/posts/' + id,
     method: 'post',

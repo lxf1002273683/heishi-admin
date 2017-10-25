@@ -11,14 +11,16 @@
         <el-table-column prop="created_at" label="发布时间" width="170"></el-table-column>
         <el-table-column prop="status" label="状态" width="80">
           <template scope='scope'>
-            <span class="status0" v-if="scope.row.post_status == 0">待审核</span>
-            <span class="status1" v-if="scope.row.post_status == 1">已通过</span>
-            <span class="status2" v-if="scope.row.post_status == -1">未通过</span>
+            <span class="status0" v-if="scope.row.post_status == 0 && scope.row.status != 0">待审核</span>
+            <span class="status1" v-if="scope.row.post_status == 1 && scope.row.status != 0">已通过</span>
+            <span class="status2" v-if="scope.row.post_status == -1 && scope.row.status != 0">未通过</span>
+            <span class="status2" v-if="scope.row.status == 0">已删除</span>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="80">
           <template scope="scope">
-            <el-button size="small" @click.stop="updateArticle(scope.row.id)">修改</el-button>
+            <el-button v-if="scope.row.status == 0" :disabled="true" size="small" >修改</el-button>
+            <el-button v-else size="small" @click.stop="updateArticle(scope.row.id)">修改</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -37,18 +39,67 @@
         </el-form-item>
         <el-form-item label="款式列表：" prop="types">
           <div class="sku_list">
-            <el-table :data="updateForm.types" stripe style="width: 500px;" border>
-              <el-table-column prop="goodsType" label="款式"></el-table-column>
-              <el-table-column label="价格"  prop="goodsPrice"></el-table-column>
+            <div class="add_types">
+              <el-select v-model="spuOptions" filterable clearable remote placeholder="请输入SPU名称" :remote-method="remoteMethod" :loading="loading"  @change="selectChange" class="select_sku_id">
+                <el-option v-for="item in spuItems" :label="item.name" :key="item.value" :value="item.id"></el-option>
+              </el-select>
+            </div>
+            <el-table :data="updateForm.types" stripe style="width: 620px;" border>
+              <el-table-column label="款式" width="120">
+                <template scope="scope">
+                  <el-input placeholder="请输入库存" size="mini" v-model="scope.row.goodsType"></el-input>
+                </template>
+              </el-table-column>
+              <el-table-column label="价格" width="100">
+                <template scope="scope">
+                  <el-input placeholder="请输入库存" size="mini" v-model="scope.row.goodsPrice"></el-input>
+                </template>
+              </el-table-column>
               <el-table-column label="库存">
                 <template scope="scope">
                   <el-input placeholder="请输入库存" size="mini" v-model="scope.row.goodsStock"></el-input>
                 </template>
               </el-table-column>
-              <el-table-column label="邮费"  prop="postage"></el-table-column>
-              <el-table-column label="操作" width="80">
+              <el-table-column label="邮费"  prop="postage">
                 <template scope="scope">
-                  <el-button size="small" @click.stop="updateStock(updateForm.id,scope.$index)">修改</el-button>
+                  <el-input placeholder="请输入库存" size="mini" v-model="scope.row.postage"></el-input>
+                </template>
+              </el-table-column>
+              <el-table-column label="SKU"  prop="hk_sku_id"></el-table-column>
+              <el-table-column label="操作" width="150">
+                <template scope="scope">
+                  <el-button class="btn" size="small" @click.stop="updateSku(updateForm.id,scope.$index)">修改</el-button>
+                  <el-button class="btn" size="small" type="danger" @click.stop="deleteSku(updateForm.id,scope.$index)">删除</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+            <el-table :data="add_types" stripe style="width: 620px;" border :show-header="false">
+              <el-table-column label="款式" width="120">
+                <template scope="scope">
+                  <el-input placeholder="请输入库存" size="mini" v-model="scope.row.type"></el-input>
+                </template>
+              </el-table-column>
+              <el-table-column label="价格" width="100">
+                <template scope="scope">
+                  <el-input placeholder="价格" size="mini" v-model="scope.row.price"></el-input>
+                </template>
+              </el-table-column>
+              <el-table-column label="库存">
+                <template scope="scope">
+                  <el-input placeholder="库存" size="mini" v-model="scope.row.quantity"></el-input>
+                </template>
+              </el-table-column>
+              <el-table-column label="邮费">
+                <template scope="scope">
+                  <el-input placeholder="邮费" size="mini" v-model="scope.row.postage"></el-input>
+                </template>
+              </el-table-column>
+              <el-table-column label="SKU" prop="id">
+              </el-table-column>
+              </el-table-column>
+              <el-table-column label="操作" width="150">
+                <template scope="scope">
+                  <el-button class="btn" size="small" type="primary " @click.stop="addType(updateForm.id,scope.$index)">添加</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -66,7 +117,8 @@
 </template>
 
 <script>
-  import { article_list, query_goods, update_stock } from '@/api/article';
+  import { article_list, query_goods, update_type } from '@/api/article';
+  import { skus_list, spus_list } from '@/api/goods';
   import { getToken } from '@/utils/auth';
 
   export default {
@@ -85,7 +137,18 @@
           filepath: '',
           types: [],
           postage: ''
-        }
+        },
+        add_types: [{
+          type: '',
+          quantity: '',
+          price: '',
+          postage: '',
+          id: '0'
+        }],
+        // sku搜索
+        spuOptions: '',
+        loading: false,
+        spuItems: []
       }
     },
     created() {
@@ -135,15 +198,68 @@
           that.updateForm = res;
         })
       },
-      updateStock(goodsId, index) {
+      // 关闭dialog时，初始化状态
+      closeDialog() {
+        this.$refs.updateForm.resetFields();
+        this.spuOptions = '';
+        this.add_types = [{
+          type: '',
+          quantity: '',
+          price: '',
+          postage: '',
+          id: '0'
+        }];
+      },
+      // 搜索spu
+      remoteMethod(query) {
+        const that = this;
+        const obj = {
+          name: query,
+          size: 20
+        }
+        if(query){
+          spus_list(obj).then((res) => {
+            that.spuItems = res.result;
+          })
+        }
+      },
+      // 将选择的sku放入table列表中
+      selectChange(val) {
+        if(!val){
+          return false;
+        }
+        const that = this;
+        const obj = {
+          spu_id: val,
+          size: 20
+        }
+        skus_list(obj).then((res) => {
+          if(!res.result.length){
+            that.$message({
+              message: '该商品没有添加sku，请添加后再选择',
+              type: 'error'
+            });
+            return false;
+          }
+          $.each(res.result, (i, n) => {
+            n['postage'] = 0;
+            that.add_types.unshift(n);
+          })
+        })
+      },
+      // 提交修改
+      updateSku(goodsId, index) {
         const that = this;
         const arr = [];
         const obj = {
-          sid: this.updateForm.types[index]['goodsTypeID'],
+          id: this.updateForm.types[index]['goodsTypeID'],
+          name: this.updateForm.types[index]['goodsType'],
+          price: this.updateForm.types[index]['goodsPrice'],
+          postage: this.updateForm.types[index]['postage'],
           stock: this.updateForm.types[index]['goodsStock']
         };
         arr.push(obj);
-        update_stock(goodsId, JSON.stringify(arr)).then((res) => {
+        update_type(goodsId, JSON.stringify(arr)).then((res) => {
           that.$message({
             message: '修改成功',
             type: 'success'
@@ -155,9 +271,90 @@
           });
         })
       },
-      // 关闭dialog时，初始化状态
-      closeDialog() {
-        this.$refs.updateForm.resetFields();
+      // 添加 款式sku
+      addType(goodsId, index) {
+        const that = this;
+        const status = false;
+        // 添加前检测
+        const active_type = that.add_types[index];
+        if(!active_type.price || !active_type.quantity || !active_type.type){
+          that.$message({
+            message: '请将款式信息填写完整',
+            type: 'error'
+          });
+          return status;
+        }
+        // 初始化提交数据
+        const skus = [];
+        const submit_type = {
+          name: that.add_types[index]['type'],
+          stock: that.add_types[index]['quantity'],
+          price: that.add_types[index]['price'],
+          postage: that.add_types[index]['postage']
+        }
+        // 检测提交数据中是否有 sku_id
+        if(that.add_types[index]['id'] != 0){
+          submit_type['sku_id'] = that.add_types[index]['id'];
+          // 检测 当前待添加sku 是否已经在商品中
+          $.each(that.updateForm.types, (i, item) => {
+            if(item.hk_sku_id == that.add_types[index]['id']){
+              that.$message({
+                message: '此SKU已关联',
+                type: 'error'
+              });
+              return status;
+            }
+          })
+          if(!status) return status;
+        }
+        // 数据提交
+        skus.push(submit_type);
+        update_type(goodsId, JSON.stringify(arr)).then((res) => {
+          that.$message({
+            message: '添加成功',
+            type: 'success'
+          });
+          // 将成功提交的数据添加到 updateForm(现有款式中)
+          const sku = {
+            goodsPrice: that.add_types[index].price,
+            goodsStock: that.add_types[index].quantity,
+            goodsType: that.add_types[index].type,
+            hk_sku_id: that.add_types[index].id,
+            postage: that.add_types[index].postage
+          }
+          that.add_types.splice(index, 1);
+          // 将成功提交的数据 在列表中删除
+          that.updateForm.types.push(sku);
+          // 提交最后一个款式后，增加新的输入表单
+          const add_types_length = that.add_types.length;
+          if(add_types_length == index){
+            const obj = {
+              type: '',
+              quantity: '',
+              price: '',
+              postage: '',
+              id: ''
+            }
+            that.add_types.push(obj);
+          }
+        },(error) => {
+          that.$message({
+            message: error.message,
+            type: 'error'
+          });
+        })
+      },
+      // 删除款式sku
+      deleteSku(goodsId, index) {
+        console.log(goodsId)
+        console.log(index)
+        const that = this;
+        that.$message({
+          message: '待添加',
+          type: 'error'
+        });
+        // 成功后操作
+        // that.updateForm.types.splice(index, 1);
       }
     }
   };
@@ -198,6 +395,13 @@
     .post_excerpt{
       max-width: 700px;
       display: block;
+    }
+    .btn{
+      display: inline-block;
+      margin: 0 5px;
+    }
+    .add_types{
+      margin: 6px 0;
     }
   }
 </style>

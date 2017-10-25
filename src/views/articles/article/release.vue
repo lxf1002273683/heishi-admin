@@ -7,7 +7,7 @@
     <div v-show="status == 0" class="select_add_type">
       <span @click="status=1" v-if="!spuSelect">直接填写</span>
       <span @click="next"  v-if="!spuSelect">商品库选择</span>
-      <el-select v-model="spuOptions" filterable clearable remote placeholder="请输入商品名称" :remote-method="remoteMethod" :loading="loading"  @change="selectChange" class="select_sku_id" v-if="spuSelect">
+      <el-select v-model="spuOptions" filterable clearable remote placeholder="请输入SPU名称" :remote-method="remoteMethod" :loading="loading"  @change="selectChange" class="select_sku_id" v-if="spuSelect">
         <el-option v-for="item in spuItems" :label="item.name" :key="item.value" :value="item.id"></el-option>
       </el-select>
     </div>
@@ -140,6 +140,12 @@
         let that = this;
         this.$refs.addForm.validate((valid) => {
           if (valid) {
+            if(that.addForm.title.length > 40){
+              return that.$message({
+                message: '标题长度不能超过40',
+                type: 'error'
+              });
+            }
             // 数据整理
             const formData = new FormData();
             formData.append('user_id', this.user_id);
@@ -151,7 +157,27 @@
             })
             // sku处理
             const skus = [];
+            const type_status = false;
             $.each(that.skuList, (index,item) => {
+              // 检测款式长度
+              if(item.type.length > 6){
+                that.$message({
+                  message: '款式长度不能超过6',
+                  type: 'error'
+                });
+                type_status = true;
+                return false;
+              }
+              // 检测库存 价格 数据类型
+              if( !$.isNumeric(item.price) || !$.isNumeric(item.quantity)){
+                that.$message({
+                  message: '请正确填写价格，库存',
+                  type: 'error'
+                });
+                type_status = true;
+                return false;
+              }
+              // 将数据添加到skus 如果是通过商品选择的，增加sku_id
               const sku_obj = {
                 name: item.type,
                 price: item.price,
@@ -163,6 +189,9 @@
               }
               skus.push(sku_obj);
             })
+            if(type_status){
+              return false;
+            }
             // 设置请求头
             const config = {
               headers: {
@@ -178,7 +207,6 @@
               });
               clearStatus(this);
             }).catch((error) => {
-              console.log(error);
               that.$message({
                 message: error.message,
                 type: 'error'
@@ -386,7 +414,7 @@
   }
   .retreat{
     position: absolute;
-    /*top: -60px;*/
-    /*right: 0;*/
+    top: -10px;
+    left: -10px;
   }
 </style>

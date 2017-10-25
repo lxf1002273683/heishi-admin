@@ -16,7 +16,7 @@
       <el-table :data="tableData" style="width: 100%" stripe border @selection-change="handleSelectionChange" ref="multipleTable" v-loading.body="listLoading" element-loading-text="拼命加载中">
         <el-table-column type="selection" width="45">
         </el-table-column>
-        <el-table-column label="商品">
+        <el-table-column label="标题">
           <template scope="scope">
             <span class="query_goods" @click="query_goods(scope.row.post_id)">
               <span class="new_comment" v-if="scope.row.status == 1">new</span>{{scope.row.post_title}}

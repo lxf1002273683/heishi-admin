@@ -12,44 +12,51 @@
         </el-input>
       </div>
       <el-table :data="tableData" border stripe style="width: 100%;"  v-loading.body="listLoading" element-loading-text="拼命加载中">
-        <el-table-column prop="consignee_name" label="买家姓名" ></el-table-column>
+        <el-table-column prop="consignee_name" label="买家姓名" min-width="100"></el-table-column>
         <el-table-column prop="phone" label="电话" ></el-table-column>
         <el-table-column prop="order_number" label="订单号" ></el-table-column>
-        <el-table-column label="商品">
+        <el-table-column label="商品" min-width="150">
           <template scope="scope">
-            <div v-for="(item, index) in scope.row.goods" :class="(index % 2) == 1 ? 'eveRow': 'oddRow'">
-                <span>{{item.object_title}}</span>
+            <div class="content-rowspan" >
+              <div v-for="(item, index) in scope.row.goods" :class="[(index % 2) == 1 ? 'eveRow': 'oddRow', item.class_status]">
+                <el-tooltip effect="light" :content="item.order_number" placement="left">
+                  <span>{{item.object_title}}</span>
+                </el-tooltip>
+              </div>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="款式" min-width="50">
+        <el-table-column label="款式" min-width="110">
           <template scope="scope">
-            <div v-for="(item, index) in scope.row.goods" :class="(index % 2) == 1 ? 'eveRow': 'oddRow'">
-              <span>{{item.goods_type_desc}}</span>
+            <div class="content-rowspan" >
+              <div v-for="(item, index) in scope.row.goods" :class="[(index % 2) == 1 ? 'eveRow': 'oddRow', item.class_status]">{{ item.goods_type_desc }}</div>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="数量" min-width="50">
+        <el-table-column label="数量" min-width="80">
           <template scope="scope">
-            <div v-for="(item, index) in scope.row.goods" :class="(index % 2) == 1 ? 'eveRow': 'oddRow'">
-              <span>{{item.counts}}</span>
+            <div class="content-rowspan" >
+              <div v-for="(item, index) in scope.row.goods" :class="[(index % 2) == 1 ? 'eveRow': 'oddRow', item.class_status]">{{ item.counts }}</div>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="价格" min-width="50">
+        <el-table-column label="价格" min-width="80">
           <template scope="scope">
-            <div v-for="(item, index) in scope.row.goods" :class="(index % 2) == 1 ? 'eveRow': 'oddRow'">
-              <span>{{item.price}}</span>
+            <div class="content-rowspan" >
+              <div v-for="(item, index) in scope.row.goods" :class="[(index % 2) == 1 ? 'eveRow': 'oddRow', item.class_status]">{{ item.price }}</div>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="退款状态" width="100">
+        <el-table-column label="退款状态" min-width="100">
           <template scope="scope">
-            <div v-for="(item, index) in scope.row.goods">
-              <span class="status1" v-if="item.process_status == 0 && item.tag == 0">无</span>
-              <span class="status2" v-if="item.process_status == 0 && item.tag == 2">已拒绝</span>
-              <span class="status3" v-if="item.process_status == 25" @click="refund_info(scope.row.order_number,item.process_status)">退款中</span>
-              <span class="status4" v-if="item.process_status == 26" @click="refund_info(scope.row.order_number,item.process_status)">完成退款</span>
+            <div class="content-rowspan" >
+              <div v-for="(item, index) in scope.row.goods" class="refund_status">
+                <span class="status1" v-if="item.process_status == 0 &&item.tag == 0">无</span>
+                <span class="status2" v-if="item.tag == 2">已拒绝</span>
+                <span class="status3" v-if="item.process_status == 25 && item.tag == 0" @click="refund_info(item.order_number,item.process_status)">退款中</span>
+                <span class="status4" v-if="item.tag == 1 && item.process_status != 26" @click="refund_info(item.order_number,item.process_status)">同意退款</span>
+                <span class="status4" v-if="item.process_status == 26" @click="refund_info(item.order_number,item.process_status)">完成退款</span>
+              </div>
             </div>
           </template>
         </el-table-column>
@@ -59,8 +66,8 @@
         <el-table-column prop="create_time" label="时间" ></el-table-column>
         <el-table-column label="操作" width="105">
           <template scope="scope">
-            <el-button size="small" class="btn" v-if="scope.row.child_status == 0" @click="openAddress(scope.row.order_number)">收货地址</el-button>
-            <el-button size="small" class="btn" v-if="scope.row.child_status == 1" :disabled="true">收货地址</el-button>
+            <el-button size="small" class="btn" v-if="scope.row.child_status == 0" @click="openAddress(scope.row.order_number,scope.$index)">发货</el-button>
+            <el-button size="small" class="btn" v-if="scope.row.child_status == 1" :disabled="true">发货</el-button>
             <span v-if="scope.row.child_status == 1" class="text">处理退款</span>
           </template>
         </el-table-column>
@@ -107,7 +114,8 @@
           order_number: '',
           express_name: '',
           express_sn: ''
-        }
+        },
+        tableDataIndex: 0
       }
     },
     watch: {
@@ -139,10 +147,14 @@
           $.each(res.orders, (index, item) => {
             item['child_status'] = 0;
             $.each(item.goods, (i, n) => {
-              if(n.process_status == 25){
+              if(n.process_status == 25 && n.tag == 0){
                 item['child_status'] = 1;
                 return false;
               }
+              // 增加子订单状态，方便添加class
+              if(n.tag == 2)  n['class_status'] = 'status2';
+              if(n.process_status == 25 && n.tag == 0)  n['class_status'] = 'status3';
+              if(n.tag == 1)  n['class_status'] = 'status4';
             })
           })
           that.tableData = res.orders;
@@ -160,12 +172,13 @@
         this.initOrderList(obj);
       },
       // 打开收货地址模态窗
-      openAddress(orderNumber) {
+      openAddress(orderNumber, index) {
         const that = this;
         address_info(orderNumber).then((res) => {
           that.addform.order_number = orderNumber;
           that.dialogStatus = true;
           that.address = res;
+          that.tableDataIndex = index;
         },(error) => {
           that.$message({
             message: error.message,
@@ -187,10 +200,20 @@
       },
       // 发货
       submit() {
-        console.log(this.addform);
-        // deliver().then(() => {
-
-        // })
+        const that = this;
+        deliver(that.addform.order_number, this.addform).then((res) => {
+          that.dialogStatus = false;
+          that.tableData.splice(that.tableDataIndex, 1);
+          that.$message({
+            message: '发货成功',
+            type: 'success'
+          });
+        },(error) => {
+          that.$message({
+            message: error.message,
+            type: 'error'
+          });
+        })
       }
     }
   };
@@ -207,12 +230,10 @@
     }
     .eveRow,
     .oddRow{
-      float: flex;
-      display: flex;
-      justify-content: space-between;
       span{
+        cursor: pointer;
         display: block;
-        margin: 2px 8px;
+        white-space: normal;
       }
     }
     .oddRow{
@@ -229,13 +250,16 @@
     }
     .status3{
       color: #FF4949;
-      text-decoration: underline;
-      cursor: pointer;
     }
     .status4{
       color: #99A9BF;
-      cursor: pointer;
-      text-decoration: underline;
+    }
+    .refund_status{
+      .status3,
+      .status4{
+        cursor: pointer;
+        text-decoration: underline;
+      }
     }
     .text{
       text-align: center;
@@ -261,6 +285,21 @@
         float: left;
         margin: 0 20px;
       }
+    }
+    .content-rowspan div {
+      padding: 0 18px;
+      line-height: 28px;
+      min-height: 28px;
+      border-bottom: 1px solid #ECEDEE;
+      right: -18px;
+      margin-left: -36px;
+      position: relative;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+    .content-rowspan div:last-child {
+      border-bottom: 0;
     }
   }
   .dialog{
