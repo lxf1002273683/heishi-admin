@@ -21,9 +21,9 @@
           <template scope="scope">
             <span v-if="scope.row.increment_quantity > 0" style="color: #20a0ff;">+{{scope.row.increment_quantity}}</span>
             <span v-if="scope.row.increment_quantity < 0" style="color: red;">{{scope.row.increment_quantity}}</span>
+            <span v-if="scope.row.memo == 'accountant_checked: passed'" style="color: #13ce66;">通过审核</span>
           </template>
         </el-table-column>
-        <el-table-column prop="memo" label="备注"></el-table-column>
         <el-table-column prop="memo" label="备注"></el-table-column>
         <el-table-column label="操作" width="100">
           <template scope="scope">

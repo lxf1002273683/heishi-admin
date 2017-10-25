@@ -14,7 +14,7 @@
       <template v-if="activeIndex == 3"><Reward :user_name="query.name" :user_id="query.id" :hs_id="query.hsId"></Reward></template>
       <!-- <template v-if="activeIndex == 4"><Search :user_name="query.name" :user_id="query.id" :hs_id="query.hsId"></Search></template> -->
       <template v-if="activeIndex == 4">
-        <RefundList :user_name="query.name" :user_id="query.id" :hs_id="query.hsId" :order_number="order_number" :status="order_number_status" @resetOrderNumber="resetOrderNum"></RefundList>
+        <RefundList :user_name="query.name" :user_id="query.id" :hs_id="query.hsId" :order_number="order_number" @resetOrderNumber="resetOrderNum"></RefundList>
       </template>
     </div>
   </div>
@@ -44,8 +44,7 @@
           id: this.$route.query.id,
           hsId: 0
         },
-        order_number: '',
-        order_number_status: ''
+        order_number: ''
       }
     },
     created() {
@@ -66,17 +65,15 @@
         this.activeIndex = index.toString();
         // 订单号
         this.order_number = data;
-        // 订单退款状态 退款中 完成退款
-        if(status == 25){
-          this.order_number_status = 2;
-        }else{
-          this.order_number_status = 3;
-        }
       },
       //重置 order_number 
       resetOrderNum(){
-        this.order_number_status = '';
         this.order_number = '';
+      },
+      // 刷新当前页
+      resetview(n) {
+        this.activeIndex = 1;
+        this.activeIndex = n;
       }
     }
   };

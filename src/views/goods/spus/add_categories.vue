@@ -153,6 +153,10 @@
         white-space: nowrap;
         margin-left: 18px;
       }
+      /*火狐兼容问题*/
+      span{
+        white-space: normal;
+      }
     }
   }
 </style>

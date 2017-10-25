@@ -140,7 +140,7 @@
       warehouse_list().then((res) => {
         that.warehouse_lists = res.data;
         // 选择默认仓库
-        that.warehouseOptions = 3;
+        that.warehouseOptions = res.data[1]['id'];
       })
     },
     methods: {
