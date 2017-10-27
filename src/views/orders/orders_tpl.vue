@@ -9,7 +9,9 @@
       <el-menu-item index="4">退款纠纷</el-menu-item>
     </el-menu>
     <div class="order_content">
-      <template v-if="activeIndex == 1"><Untreated :user_name="query.name" :user_id="query.id" :hs_id="query.hsId" @activeIndexChange="activeChange"></Untreated></template>
+      <template v-if="activeIndex == 1">
+        <Untreated :user_name="query.name" :user_id="query.id" :hs_id="query.hsId" :hs_name="query.hs_name" @activeIndexChange="activeChange"></Untreated>
+      </template>
       <template v-if="activeIndex == 2"><Delivered :user_name="query.name" :user_id="query.id" :hs_id="query.hsId" @activeIndexChange="activeChange"></Delivered></template>
       <template v-if="activeIndex == 3"><Reward :user_name="query.name" :user_id="query.id" :hs_id="query.hsId"></Reward></template>
       <!-- <template v-if="activeIndex == 4"><Search :user_name="query.name" :user_id="query.id" :hs_id="query.hsId"></Search></template> -->
@@ -42,7 +44,8 @@
         query: {
           name: this.$route.query.name,
           id: this.$route.query.id,
-          hsId: 0
+          hsId: 0,
+          hs_name: null,
         },
         order_number: ''
       }
@@ -52,6 +55,7 @@
       const that = this;
       get_user_info(this.$route.query.id).then((res) => {
         that.query.hsId = res.hs_user_id;
+        that.query.hs_name = res.account;
       })
     },
     methods: {

@@ -81,11 +81,11 @@ a:hover {
 }
 //table 
 .el-table .info-row {
-  background: #50bfff;
+  background: #8cbfdc;
 }
 
 .el-table .success-row {
-  background: #13ce66;
+  background: #9da6ab;
 }
 .el-table .warning-row {
   background: #f7ba2a;
@@ -93,4 +93,17 @@ a:hover {
 
 .el-table .danger-row {
   background: #ff4949;
+}
+
+.table-expand {
+  font-size: 0;
+}
+.table-expand label {
+  width: 90px;
+  color: #99a9bf;
+}
+.table-expand .el-form-item {
+  margin-right: 0;
+  margin-bottom: 0;
+  width: 50%;
 }

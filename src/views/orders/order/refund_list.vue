@@ -17,8 +17,36 @@
         </el-input>
       </div>
       <el-table :data="tableData" border style="width: 100%;"  v-loading.body="listLoading" element-loading-text="拼命加载中" :row-class-name="tableRowClassName">
-        <el-table-column prop="consignee_name" label="买家姓名" min-width="100"></el-table-column>
-        <el-table-column prop="phone" label="电话" ></el-table-column>
+        <el-table-column type="expand">
+          <template scope="props">
+            <el-form label-position="left" inline class="table-expand">
+              <el-form-item label="买家姓名:">
+                <span>{{ props.row.consignee_name }}</span>
+              </el-form-item>
+              <el-form-item label="联系方式:">
+                <span>{{ props.row.phone }}</span>
+              </el-form-item>
+              <el-form-item label="邮费:">
+                <span>{{ props.row.postage }}</span>
+              </el-form-item>
+              <el-form-item label="总价:">
+                <span v-if="props.row.goods" class="content-rowspan" >
+                  <span>{{props.row.total_fee}}</span>
+                </span>
+                <span v-if="!props.row.goods">
+                  {{props.row.total_fee + props.row.postage}}
+                </span>
+              </el-form-item>
+              <!-- <el-form-item label="订单类型:">
+                <span v-if="props.row.type == 1">正常订单</span>
+                <span v-if="props.row.type != 1">购物车订单</span>
+              </el-form-item> -->
+              <el-form-item label="时间:">
+                <span>{{ props.row.create_time }}</span>
+              </el-form-item>
+            </el-form>
+          </template>
+        </el-table-column>
         <el-table-column prop="order_number" label="订单号" ></el-table-column>
         <el-table-column label="商品名称" min-width="150">
           <template scope="scope">
@@ -60,24 +88,6 @@
             <div v-if="!scope.row.goods">
               {{scope.row.price}}
             </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="postage" label="邮费" width="80"></el-table-column>
-        <el-table-column label="总价">
-          <template scope="scope">
-            <div v-if="scope.row.goods" class="content-rowspan" >
-              <div>{{scope.row.total_fee}}</div>
-            </div>
-            <div v-if="!scope.row.goods">
-              {{scope.row.total_fee + scope.row.postage}}
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="create_time" label="时间" ></el-table-column>
-        <el-table-column prop="create_time" label="订单类型" >
-          <template scope="scope">
-            <span v-if="scope.row.type == 1">正常订单</span>
-            <span v-if="scope.row.type != 1">购物车订单</span>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="105">

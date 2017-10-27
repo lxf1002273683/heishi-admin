@@ -56,4 +56,14 @@
      return d.getMonth() + 1 + '月' + d.getDate() + '日' + d.getHours() + '时' + d.getMinutes() + '分'
    }
  }
+ // 整数类型判断
+ export function numberInt(n) {
+   let status = true;
+   if ($.isNumeric(n)) {
+     if (n % 1 === 0) {
+      status = false;
+     }
+   }
+   return status;
+ }
 

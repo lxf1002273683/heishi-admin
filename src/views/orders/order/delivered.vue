@@ -12,8 +12,37 @@
         </el-input>
       </div>
       <el-table :data="tableData" border stripe style="width: 100%;"  v-loading.body="listLoading" element-loading-text="拼命加载中">
+        <el-table-column type="expand">
+          <template scope="props">
+            <el-form label-position="left" inline class="table-expand">
+              <el-form-item label="买家姓名:">
+                <span>{{ props.row.consignee_name }}</span>
+              </el-form-item>
+              <el-form-item label="联系方式:">
+                <span>{{ props.row.phone }}</span>
+              </el-form-item>
+              <el-form-item label="邮费:">
+                <span>{{ props.row.postage }}</span>
+              </el-form-item>
+              <el-form-item label="总价:">
+                <span>{{ props.row.total_fee }}</span>
+              </el-form-item>
+              <el-form-item label="收货地址:">
+                <span>{{props.row.province}}{{props.row.city}}{{props.row.district}}{{props.row.detail}}</span>
+              </el-form-item>
+              <el-form-item label="邮编:">
+                <span>{{props.row.postal_code}}</span>
+              </el-form-item>
+              <el-form-item label="备注:">
+                <span>{{ props.row.attach }}</span>
+              </el-form-item>
+              <el-form-item label="时间:">
+                <span>{{ props.row.create_time }}</span>
+              </el-form-item>
+            </el-form>
+          </template>
+        </el-table-column>
         <el-table-column prop="consignee_name" label="买家姓名" min-width="100"></el-table-column>
-        <el-table-column prop="phone" label="电话" ></el-table-column>
         <el-table-column prop="order_number" label="订单号" ></el-table-column>
         <el-table-column label="商品" min-width="150">
           <template scope="scope">
@@ -59,10 +88,6 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="postage" label="邮费" min-width="50"></el-table-column>
-        <el-table-column prop="total_fee" label="总价" min-width="50"></el-table-column>
-        <el-table-column prop="attach" label="备注" min-width="50"></el-table-column>
-        <el-table-column prop="create_time" label="时间" ></el-table-column>
         <el-table-column label="状态" width="80">
           <template scope="scope">
             <span v-if="scope.row.process_status == 1" class="untreated_status1">未收货</span>
@@ -71,7 +96,7 @@
         </el-table-column>
         <el-table-column label="操作" width="105">
           <template scope="scope">
-            <el-button size="small" @click="expressInfo(scope.row.order_number)">收货地址</el-button>
+            <el-button size="small" @click="expressInfo(scope.row.order_number)">快递查询</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -122,7 +147,8 @@
           size: 20,
           uid: this.hs_id,
           role: 4,
-          status: 6
+          status: 6,
+          include_address: 1
         }
         if(obj){
           $.extend(params, obj)
