@@ -4,7 +4,7 @@
     <div class="quickphrases_list">
       <el-form autoComplete="on" ref="addForm" :model="addForm" label-width="80px" class="addform" :rules="loginRules">
         <el-form-item label="短语" prop="content">
-            <el-input v-model="addForm.content" autoComplete="on"></el-input>
+            <el-input v-model="addForm.content" autoComplete="on" type="textarea"></el-input>
         </el-form-item>
         <el-form-item>
             <el-button type="primary" @click="onSubmit">立即创建</el-button>
@@ -96,8 +96,9 @@
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>
   .quickphrases_list{
-    .el-input{
-      width: 240px;
+    .el-textarea{
+      width: 50%;
+      min-width: 240px;
     }
   }
 </style>

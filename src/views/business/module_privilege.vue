@@ -59,6 +59,7 @@
     methods: {
       updatePrivilege() {
         const that = this;
+        // 在pc微信端打开 只有选择两个以上的卖家帐号，或者模块 才行，否则进入else
         if(this.addForm.users.length && this.addForm.modules.length && this.addForm.owners.length){
           user_privilege(this.addForm).then((res) => {
             this.$message({

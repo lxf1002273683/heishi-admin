@@ -10,10 +10,39 @@
         <el-input class="search_inp" placeholder="请输入订单号" v-model="order_num" @change="searchOrderNumChange(0)">
           <el-button slot="append" icon="search" @click="searchOrderNumChange"></el-button>
         </el-input>
+        <el-button type="primary" @click="educeExcel">导出Excel</el-button>
       </div>
       <el-table :data="tableData" border stripe style="width: 100%;"  v-loading.body="listLoading" element-loading-text="拼命加载中">
-        <el-table-column prop="consignee_name" label="买家姓名" min-width="100"></el-table-column>
-        <el-table-column prop="phone" label="电话" ></el-table-column>
+        <el-table-column type="expand">
+          <template scope="props">
+            <el-form label-position="left" inline class="table-expand">
+              <el-form-item label="买家姓名:">
+                <span>{{ props.row.consignee_name }}</span>
+              </el-form-item>
+              <el-form-item label="联系方式:">
+                <span>{{ props.row.phone }}</span>
+              </el-form-item>
+              <el-form-item label="邮费:">
+                <span>{{ props.row.postage }}</span>
+              </el-form-item>
+              <el-form-item label="总价:">
+                <span>{{ props.row.total_fee }}</span>
+              </el-form-item>
+              <el-form-item label="收货地址:">
+                <span>{{props.row.province}}{{props.row.city}}{{props.row.district}}{{props.row.detail}}</span>
+              </el-form-item>
+              <el-form-item label="邮编:">
+                <span>{{props.row.postal_code}}</span>
+              </el-form-item>
+              <el-form-item label="备注:">
+                <span>{{ props.row.attach }}</span>
+              </el-form-item>
+              <el-form-item label="时间:">
+                <span>{{ props.row.create_time }}</span>
+              </el-form-item>
+            </el-form>
+          </template>
+        </el-table-column>
         <el-table-column prop="order_number" label="订单号" ></el-table-column>
         <el-table-column label="商品" min-width="150">
           <template scope="scope">
@@ -60,13 +89,19 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="postage" label="邮费" min-width="50"></el-table-column>
-        <el-table-column prop="total_fee" label="总价" min-width="50"></el-table-column>
-        <el-table-column prop="attach" label="备注"  min-width="50"></el-table-column>
-        <el-table-column prop="create_time" label="时间" ></el-table-column>
+        <el-table-column label="收货地址" min-width="200">
+          <template scope="scope">
+            <el-input placeholder="请输入快递公司" v-model="scope.row.express_name" size="small">
+              <template slot="prepend">快递公司</template>
+            </el-input>
+            <el-input placeholder="请输入快递单号" v-model="scope.row.express_sn" size="small">
+              <template slot="prepend">快递单号</template>
+            </el-input>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="105">
           <template scope="scope">
-            <el-button size="small" class="btn" v-if="scope.row.child_status == 0" @click="openAddress(scope.row.order_number,scope.$index)">发货</el-button>
+            <el-button size="small" class="btn" v-if="scope.row.child_status == 0" @click="submit(scope.row.order_number,scope.$index)">发货</el-button>
             <el-button size="small" class="btn" v-if="scope.row.child_status == 1" :disabled="true">发货</el-button>
             <span v-if="scope.row.child_status == 1" class="text">处理退款</span>
           </template>
@@ -74,48 +109,21 @@
       </el-table>
       <el-pagination v-if="totalPages > 10" layout="prev, pager, next" :total="totalPages" @current-change="handleCurrentChange" class='pagination'></el-pagination>
     </div>
-    <el-dialog title="收货地址" :visible.sync="dialogStatus" class="orders_list" size="small">
-      <div class="dialog">
-        <p>买家: {{address.name}}</p>
-        <p>电话: {{address.phone}}</p>
-        <p>地址: {{address.province}}{{address.city}}{{address.district}}{{address.detail}}</p>
-        <p>邮编: {{address.postal_code}}</p>
-        <el-form ref="addform" :model="addform" label-width="80px">
-          <el-form-item label="物流公司">
-            <el-input v-model="addform.express_name"></el-input>
-          </el-form-item>
-          <el-form-item label="物流单号">
-            <el-input v-model="addform.express_sn"></el-input>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="submit">发货</el-button>
-          </el-form-item>
-        </el-form>
-      </div>
-    </el-dialog>
   </div>
 </template>
-
 <script>
   import { order_list, order_number_search, name_tel_search, address_info, deliver } from '@/api/order';
+  import { downloadExl } from '@/utils/excel';
 
   export default {
-    props: ['user_name', 'user_id', 'hs_id'],
+    props: ['user_name', 'user_id', 'hs_id', 'hs_name'],
     data() {
       return {
         tableData: [],
         listLoading: true,
         totalPages: 0,
-        dialogStatus: false,
         keyword: '',
-        order_num: '',
-        address: {},
-        addform: {
-          order_number: '',
-          express_name: '',
-          express_sn: ''
-        },
-        tableDataIndex: 0
+        order_num: ''
       }
     },
     watch: {
@@ -136,7 +144,8 @@
           size: 20,
           uid: this.hs_id,
           role: 4,
-          status: 0
+          status: 0,
+          include_address: 1
         }
         if(obj){
           $.extend(params, obj)
@@ -156,6 +165,8 @@
               if(n.process_status == 25 && n.tag == 0)  n['class_status'] = 'status3';
               if(n.tag == 1)  n['class_status'] = 'status4';
             })
+            item['express_sn'] = null;
+            item['express_name'] = null;
           })
           that.tableData = res.orders;
           that.totalPages = res.totalPages*10;
@@ -171,21 +182,6 @@
         obj.order_number = this.order_num;
         this.initOrderList(obj);
       },
-      // 打开收货地址模态窗
-      openAddress(orderNumber, index) {
-        const that = this;
-        address_info(orderNumber).then((res) => {
-          that.addform.order_number = orderNumber;
-          that.dialogStatus = true;
-          that.address = res;
-          that.tableDataIndex = index;
-        },(error) => {
-          that.$message({
-            message: error.message,
-            type: 'error'
-          });
-        })
-      },
       // 买家名，电话搜索
       searchKeyChange(num) {
         name_tel_search(num, this)
@@ -199,24 +195,55 @@
         this.$emit('activeIndexChange', order_number, 4, status);
       },
       // 发货
-      submit() {
+      submit(order_number, index) {
         const that = this;
-        deliver(that.addform.order_number, this.addform).then((res) => {
-          that.dialogStatus = false;
-          that.tableData.splice(that.tableDataIndex, 1);
+        if(!this.tableData[index]['express_sn'] || !this.tableData[index]['express_name']){
           that.$message({
-            message: '发货成功',
-            type: 'success'
-          });
-        },(error) => {
-          that.$message({
-            message: error.message,
+            message: '请输入快递公司，以及快递单号',
             type: 'error'
           });
+          return false;
+        }
+        const obj = {
+          express_sn: this.tableData[index]['express_sn'],
+          express_name: this.tableData[index]['express_name']
+        }
+        that.$confirm('核实快递信息是否正确?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          deliver(order_number, obj).then((res) => {
+            that.tableData.splice(index, 1);
+            that.$message({
+              message: '发货成功',
+              type: 'success'
+            });
+          },(error) => {
+            that.$message({
+              message: error.message,
+              type: 'error'
+            });
+          })
+        }).catch(() => {});
+      },
+      // 导出excel 默认查询500每页，后期增加查询全部条件
+      educeExcel() {
+        const that = this;
+        const params = {
+          size: 500,
+          uid: this.hs_id,
+          role: 4,
+          status: 0,
+          include_address: 1
+        }
+        order_list(params).then((res) => {
+          downloadExl(res.orders, this.hs_name);
         })
       }
     }
   };
+  
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>
   .untreated_list{

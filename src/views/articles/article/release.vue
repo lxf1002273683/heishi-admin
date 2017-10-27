@@ -83,6 +83,7 @@
   import { spus_list, skus_list } from '@/api/goods';
   import { add_article } from '@/api/article';
   import axios from 'axios';
+  import { numberInt } from '@/utils/index';
 
   export default {
     props: ['user_name', 'user_id'],
@@ -169,9 +170,9 @@
                 return false;
               }
               // 检测库存 价格 数据类型
-              if( !$.isNumeric(item.price) || !$.isNumeric(item.quantity)){
+              if( numberInt(item.price) || numberInt(item.quantity) || numberInt(that.addForm.postage)){
                 that.$message({
-                  message: '请正确填写价格，库存',
+                  message: '请正确填写价格，库存格式(不能有小数)',
                   type: 'error'
                 });
                 type_status = true;

@@ -2,6 +2,7 @@
   <div class="app-container">
     <div class="reward_list">
       <el-table :data="tableData" border stripe style="width: 100%;"  v-loading.body="listLoading" element-loading-text="拼命加载中">
+        <el-table-column prop="buyer_name" label="买家" ></el-table-column>
         <el-table-column prop="order_number" label="订单号" ></el-table-column>
         <el-table-column prop="object_title" label="商品名称" ></el-table-column>
         <el-table-column prop="total_fee" label="金额" ></el-table-column>

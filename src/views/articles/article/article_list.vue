@@ -19,7 +19,7 @@
         </el-table-column>
         <el-table-column label="操作" width="80">
           <template scope="scope">
-            <el-button v-if="scope.row.status == 0" :disabled="true" size="small" >修改</el-button>
+            <el-button v-if="scope.row.status == 0 || scope.row.post_status == -1" :disabled="true" size="small" >修改</el-button>
             <el-button v-else size="small" @click.stop="updateArticle(scope.row.id)">修改</el-button>
           </template>
         </el-table-column>
@@ -58,6 +58,7 @@
               <el-table-column label="库存">
                 <template scope="scope">
                   <el-input placeholder="请输入库存" size="mini" v-model="scope.row.goodsStock"></el-input>
+                  <el-button class="btn" size="mini" ">库存</el-button>
                 </template>
               </el-table-column>
               <el-table-column label="邮费"  prop="postage">
@@ -120,6 +121,7 @@
   import { article_list, query_goods, update_type } from '@/api/article';
   import { skus_list, spus_list } from '@/api/goods';
   import { getToken } from '@/utils/auth';
+  import { numberInt } from '@/utils/index';
 
   export default {
     props: ['user_name', 'user_id'],
@@ -148,7 +150,8 @@
         // sku搜索
         spuOptions: '',
         loading: false,
-        spuItems: []
+        spuItems: [],
+        openArticleId: null
       }
     },
     created() {
@@ -193,6 +196,7 @@
       // 打开修改窗口
       updateArticle(id) {
         this.dialogStatus = true;
+        this.openArticleId = id;
         const that = this;
         query_goods(id).then((res) => {
           that.updateForm = res;
@@ -200,6 +204,7 @@
       },
       // 关闭dialog时，初始化状态
       closeDialog() {
+        this.openArticleId = null;
         this.$refs.updateForm.resetFields();
         this.spuOptions = '';
         this.add_types = [{
@@ -258,6 +263,8 @@
           postage: this.updateForm.types[index]['postage'],
           stock: this.updateForm.types[index]['goodsStock']
         };
+        // 添加前检测
+        if(verification(obj, that)) return false;
         arr.push(obj);
         update_type(goodsId, JSON.stringify(arr)).then((res) => {
           that.$message({
@@ -274,16 +281,7 @@
       // 添加 款式sku
       addType(goodsId, index) {
         const that = this;
-        const status = false;
-        // 添加前检测
-        const active_type = that.add_types[index];
-        if(!active_type.price || !active_type.quantity || !active_type.type){
-          that.$message({
-            message: '请将款式信息填写完整',
-            type: 'error'
-          });
-          return status;
-        }
+        let status = false;
         // 初始化提交数据
         const skus = [];
         const submit_type = {
@@ -292,6 +290,8 @@
           price: that.add_types[index]['price'],
           postage: that.add_types[index]['postage']
         }
+        // 添加前检测
+        if(verification(submit_type, that)) return false;
         // 检测提交数据中是否有 sku_id
         if(that.add_types[index]['id'] != 0){
           submit_type['sku_id'] = that.add_types[index]['id'];
@@ -302,29 +302,26 @@
                 message: '此SKU已关联',
                 type: 'error'
               });
+
+              status = true;
               return status;
             }
           })
-          if(!status) return status;
+          if(status) return status;
         }
         // 数据提交
         skus.push(submit_type);
-        update_type(goodsId, JSON.stringify(arr)).then((res) => {
+        update_type(goodsId, JSON.stringify(skus)).then((res) => {
           that.$message({
             message: '添加成功',
             type: 'success'
           });
-          // 将成功提交的数据添加到 updateForm(现有款式中)
-          const sku = {
-            goodsPrice: that.add_types[index].price,
-            goodsStock: that.add_types[index].quantity,
-            goodsType: that.add_types[index].type,
-            hk_sku_id: that.add_types[index].id,
-            postage: that.add_types[index].postage
-          }
-          that.add_types.splice(index, 1);
+          // 更新已添加款式
+          query_goods(that.openArticleId).then((res) => {
+            that.updateForm = res;
+          })
           // 将成功提交的数据 在列表中删除
-          that.updateForm.types.push(sku);
+          that.add_types.splice(index, 1);
           // 提交最后一个款式后，增加新的输入表单
           const add_types_length = that.add_types.length;
           if(add_types_length == index){
@@ -333,7 +330,7 @@
               quantity: '',
               price: '',
               postage: '',
-              id: ''
+              id: '0'
             }
             that.add_types.push(obj);
           }
@@ -358,6 +355,16 @@
       }
     }
   };
+  // 对提交信息进行验证， 错误返回true
+  function verification(active_type, that) {
+    if(numberInt(active_type.price) || numberInt(active_type.stock) || !active_type.name || numberInt(active_type.postage)){
+      that.$message({
+        message: '请正确填写款式信息(数字中不要出现小数)',
+        type: 'error'
+      });
+      return true;
+    }
+  }
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>
   .article_list{
