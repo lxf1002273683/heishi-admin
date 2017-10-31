@@ -10,6 +10,7 @@ function formatJSON(orders) {
     obj['省'] = item.province;
     obj['市'] = item.city;
     obj['区'] = item.district;
+    obj['详细地址'] = item.detail;
     obj['邮编'] = item.postal_code;
     if (item.goods.length === 1) {
       obj['商品名称'] = item.goods[0].object_title;
@@ -25,7 +26,8 @@ function formatJSON(orders) {
       obj['订单号'] = item.order_number;
       arr.push(obj);
       $.each(item.goods, (i, n) => {
-        if (n.process_status !== 25) {
+        // 退款状态中，退款完成的订单不导出
+        if (n.process_status !== 25 && n.process_status !== 26) {
           const childObj = {
           '收货人': null, '收货电话': null, '省': null, '市': null, '区': null, '详细地址': null, '邮编': null,
           '商品名称': null, '数量': null, '备注': null, '款式': null, '订单号': null};

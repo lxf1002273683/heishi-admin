@@ -90,6 +90,20 @@
             </div>
           </template>
         </el-table-column>
+        <el-table-column label="逾期时间(到期自动退款)" min-width="80">
+          <template scope="scope">
+            <div v-if="scope.row.goods" class="content-rowspan" >
+              <div v-for="(item, index) in scope.row.goods" :class="(index % 2) == 1 ? 'eveRow': 'oddRow'">
+                <div class="overdue_time" v-if="item.tag != 2 && item.tag != 1">{{item.overdue_time}}</div>
+                <div v-else>无</div>
+              </div>
+            </div>
+            <div v-if="!scope.row.goods">
+              <div class="overdue_time" v-if="scope.row.tag != 2 && scope.row.tag != 1">{{scope.row.overdue_time}}</div>
+              <div v-else>无</div>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="105">
           <template scope="scope">
             <div v-if="scope.row.goods" class="content-rowspan" >
@@ -124,10 +138,9 @@
     </el-dialog>
   </div>
 </template>
-<!-- HS20170913165725LNBOVT "2017-09-13 16:57:25"
- -->
 <script>
   import { order_list, order_number_search, name_tel_search, process_refund_order } from '@/api/order';
+  import { parseTime } from '@/utils/index';
 
   export default {
     props: ['user_name', 'user_id', 'hs_id', 'order_number'],
@@ -172,6 +185,18 @@
         }
         that.listLoading = true;
         order_list(params).then((res) => {
+          // 遍历 增加逾期时间
+          $.each(res.orders, (index, item) => {
+            if(item['goods']){
+              $.each(item.goods, (i, n) => {
+                const timestamp = new Date(n.refund_apply_time).getTime() + 86400000*2;
+                n['overdue_time'] = parseTime(timestamp);
+              })
+            }else{
+              const timestamp = new Date(item.refund_apply_time).getTime() + 86400000*2;
+              item['overdue_time'] = parseTime(timestamp);
+            }
+          })
           that.tableData = res.orders;
           that.totalPages = res.totalPages*10;
           that.listLoading = false;
@@ -308,6 +333,10 @@
     }
     .content-rowspan div:last-child {
       border-bottom: 0;
+    }
+    .overdue_time {
+      color: #FA5555;
+      font-weight: 700;
     }
   }
   .dialog{

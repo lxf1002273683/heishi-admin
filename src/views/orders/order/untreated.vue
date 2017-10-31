@@ -10,7 +10,7 @@
         <el-input class="search_inp" placeholder="请输入订单号" v-model="order_num" @change="searchOrderNumChange(0)">
           <el-button slot="append" icon="search" @click="searchOrderNumChange"></el-button>
         </el-input>
-        <el-button type="primary" @click="educeExcel">导出Excel</el-button>
+        <el-button type="primary" @click="educeExcel" class="excel">导出Excel</el-button>
       </div>
       <el-table :data="tableData" border stripe style="width: 100%;"  v-loading.body="listLoading" element-loading-text="拼命加载中">
         <el-table-column type="expand">
@@ -250,6 +250,9 @@
     .pagination{
       text-align: center;
       padding: 20px 0;
+    }
+    .excel{
+      float: right;
     }
     p{
       line-height: 30px;

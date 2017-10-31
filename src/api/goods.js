@@ -109,6 +109,14 @@ export function update_skus(id, form) {
     data: form
   });
 }
+// 查询sku 详情
+export function sku_info(id) {
+  return fetch({
+    url: '/warehouse/api/v1/skus/' + id,
+    method: 'get'
+  });
+}
+
 // 查询某个sku对应的所有批次
 export function sku_batches(form) {
   return fetch({
