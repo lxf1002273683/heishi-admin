@@ -17,7 +17,7 @@
 </template>
 
 <script>
-  import { add_categories, categories_list, update_categories, classify } from "@/api/goods";
+  import { add_categories, categories_list, update_categories, classify, delete_categories } from "@/api/goods";
   export default {
     watch: {
       filterText(val) {
@@ -101,7 +101,34 @@
                           }
                         }).catch(()=>{})
                       }
-                  }},"修改")
+                  }},"修改"),
+                  createElement('el-button',{attrs:{
+                      size: "mini",
+                      type: "danger"
+                  },on:{
+                      click:function() {
+                        that.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                          confirmButtonText: '确定',
+                          cancelButtonText: '取消',
+                          type: 'warning'
+                        }).then(() => {
+                          const arr = [];
+                          arr.push(data.id);
+                          delete_categories(arr).then(() => {
+                            that.$message({
+                              message: '删除成功',
+                              type: 'success'
+                            });
+                            that.updateData();
+                          },(error) => {
+                            that.$message({
+                              message: error.message,
+                              type: 'error'
+                            });
+                          })
+                        }).catch(()=>{})
+                      }
+                  }},"删除"),
               ]),
           ]);
       },

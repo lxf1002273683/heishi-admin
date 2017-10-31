@@ -280,7 +280,6 @@
           that.tableData[that.addForm.parent_index]['batches'][that.addForm.index]['purchasing_price'] = that.addForm.purchasing_price;
           that.$refs.addForm.resetFields();
         },(error) => {
-          console.log(error);
           that.$message({
             message: error.message,
             type: 'error'

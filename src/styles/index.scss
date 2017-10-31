@@ -64,46 +64,54 @@ a:hover {
   fill: currentColor;
   overflow: hidden;
 }
+/*!important 强制替换element默认样式*/
 //设置上传框样式
 .upload .el-upload{
-  height: auto;
-  min-height: 148px;
-  width: auto;
-  min-width: 148px;
-  max-width: 560px;
+  height: auto !important;
+  min-height: 148px !important;
+  width: auto !important;
+  min-width: 148px !important;
+  max-width: 560px !important;
 }
 //步骤条 宽度限制
 .el-step__description{
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 370px;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 370px !important;
 }
 //table 
 .el-table .info-row {
-  background: #8cbfdc;
+  background: #8cbfdc !important;
 }
 
 .el-table .success-row {
-  background: #9da6ab;
+  background: #9da6ab !important;
 }
 .el-table .warning-row {
-  background: #f7ba2a;
+  background: #f7ba2a !important;
 }
 
 .el-table .danger-row {
-  background: #ff4949;
+  background: #ff4949 !important;
 }
 
 .table-expand {
-  font-size: 0;
+  font-size: 0 !important;
 }
 .table-expand label {
-  width: 90px;
-  color: #99a9bf;
+  width: 90px !important;
+  color: #99a9bf !important;
 }
 .table-expand .el-form-item {
-  margin-right: 0;
-  margin-bottom: 0;
-  width: 50%;
+  margin-right: 0 !important;
+  margin-bottom: 0 !important;
+  width: 50% !important;
+}
+.table-expand .el-form-item .el-form-item__content{
+  width: 75% !important;
+  
+}
+.el-table .cell {
+  padding: 0 10px !important;
 }

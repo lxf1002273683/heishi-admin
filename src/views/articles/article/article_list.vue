@@ -45,29 +45,32 @@
               </el-select>
             </div>
             <el-table :data="updateForm.types" stripe style="width: 620px;" border>
-              <el-table-column label="款式" width="120">
+              <el-table-column label="款式">
                 <template scope="scope">
                   <el-input placeholder="请输入库存" size="mini" v-model="scope.row.goodsType"></el-input>
                 </template>
               </el-table-column>
-              <el-table-column label="价格" width="100">
+              <el-table-column label="价格" width="70">
                 <template scope="scope">
                   <el-input placeholder="请输入库存" size="mini" v-model="scope.row.goodsPrice"></el-input>
                 </template>
               </el-table-column>
-              <el-table-column label="库存">
+              <el-table-column label="库存" width="140">
                 <template scope="scope">
-                  <el-input placeholder="请输入库存" size="mini" v-model="scope.row.goodsStock"></el-input>
-                  <el-button class="btn" size="mini" ">库存</el-button>
+                  <el-input placeholder="请输入库存" size="mini" v-model="scope.row.goodsStock" class="stock"></el-input>
+                  <el-button type="text" @click.once="query_stock(scope.row.hk_sku_id,scope.$index)"  class="btn" size="mini" >
+                    <span v-if="scope.row.reality_stock > 0">{{scope.row.reality_stock}}</span>
+                    <span v-else>商品库存</span>
+                  </el-button>
                 </template>
               </el-table-column>
-              <el-table-column label="邮费"  prop="postage">
+              <el-table-column label="邮费"  prop="postage" width="70">
                 <template scope="scope">
                   <el-input placeholder="请输入库存" size="mini" v-model="scope.row.postage"></el-input>
                 </template>
               </el-table-column>
-              <el-table-column label="SKU"  prop="hk_sku_id"></el-table-column>
-              <el-table-column label="操作" width="150">
+              <el-table-column label="SKU"  prop="hk_sku_id" width="70"></el-table-column>
+              <el-table-column label="操作" width="130">
                 <template scope="scope">
                   <el-button class="btn" size="small" @click.stop="updateSku(updateForm.id,scope.$index)">修改</el-button>
                   <el-button class="btn" size="small" type="danger" @click.stop="deleteSku(updateForm.id,scope.$index)">删除</el-button>
@@ -75,30 +78,30 @@
               </el-table-column>
             </el-table>
             <el-table :data="add_types" stripe style="width: 620px;" border :show-header="false">
-              <el-table-column label="款式" width="120">
+              <el-table-column label="款式">
                 <template scope="scope">
                   <el-input placeholder="请输入库存" size="mini" v-model="scope.row.type"></el-input>
                 </template>
               </el-table-column>
-              <el-table-column label="价格" width="100">
+              <el-table-column label="价格" width="70">
                 <template scope="scope">
                   <el-input placeholder="价格" size="mini" v-model="scope.row.price"></el-input>
                 </template>
               </el-table-column>
-              <el-table-column label="库存">
+              <el-table-column label="库存" width="140">
                 <template scope="scope">
                   <el-input placeholder="库存" size="mini" v-model="scope.row.quantity"></el-input>
                 </template>
               </el-table-column>
-              <el-table-column label="邮费">
+              <el-table-column label="邮费" width="70">
                 <template scope="scope">
                   <el-input placeholder="邮费" size="mini" v-model="scope.row.postage"></el-input>
                 </template>
               </el-table-column>
-              <el-table-column label="SKU" prop="id">
+              <el-table-column label="SKU" prop="id" width="70">
               </el-table-column>
               </el-table-column>
-              <el-table-column label="操作" width="150">
+              <el-table-column label="操作" width="130">
                 <template scope="scope">
                   <el-button class="btn" size="small" type="primary " @click.stop="addType(updateForm.id,scope.$index)">添加</el-button>
                 </template>
@@ -119,7 +122,7 @@
 
 <script>
   import { article_list, query_goods, update_type } from '@/api/article';
-  import { skus_list, spus_list } from '@/api/goods';
+  import { skus_list, spus_list, sku_info } from '@/api/goods';
   import { getToken } from '@/utils/auth';
   import { numberInt } from '@/utils/index';
 
@@ -197,10 +200,7 @@
       updateArticle(id) {
         this.dialogStatus = true;
         this.openArticleId = id;
-        const that = this;
-        query_goods(id).then((res) => {
-          that.updateForm = res;
-        })
+        this.article_info(id);
       },
       // 关闭dialog时，初始化状态
       closeDialog() {
@@ -317,9 +317,7 @@
             type: 'success'
           });
           // 更新已添加款式
-          query_goods(that.openArticleId).then((res) => {
-            that.updateForm = res;
-          })
+          that.article_info(that.openArticleId);
           // 将成功提交的数据 在列表中删除
           that.add_types.splice(index, 1);
           // 提交最后一个款式后，增加新的输入表单
@@ -352,6 +350,24 @@
         });
         // 成功后操作
         // that.updateForm.types.splice(index, 1);
+      },
+      // 查询库存
+      query_stock(id, index) {
+        const that = this;
+        sku_info(id).then((res) => {
+          that.updateForm.types[index]['reality_stock'] = res.quantity;
+        })
+      },
+      // 查询商品详情
+      article_info(id) {
+        const that = this;
+        query_goods(id).then((res) => {
+          // 增加一个实际库存参数，方便后面显示
+          $.each(res.types, (index, item) => {
+            item['reality_stock'] = 0;
+          })
+          that.updateForm = res;
+        })
       }
     }
   };
@@ -409,6 +425,12 @@
     }
     .add_types{
       margin: 6px 0;
+    }
+    .stock{
+      width: 50px;
+    }
+    .cell{
+      padding: 0 10px;
     }
   }
 </style>
