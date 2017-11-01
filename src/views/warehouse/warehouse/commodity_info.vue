@@ -88,7 +88,7 @@
         const that = this;
         const params = {};
         if(obj){
-          $.extend(params, obj)
+          Object.assign(params, obj)
         }
         that.listLoading = true;
         get_skus(this.warehouse_id, params).then((res) => {

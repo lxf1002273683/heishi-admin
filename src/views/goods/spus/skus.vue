@@ -118,9 +118,9 @@
       warehouses(warehouses) {
         const that = this;
         warehouse_list().then((res) => {
-          $.each(res.data, (index, item) => {
-            $.each(warehouses, (i, m) => {
-              if(m.id == item.id){
+          res.data.forEach((item, index) => {
+            warehouses.forEach((n, i) => {
+              if(n.id == item.id){
                 item['web_status'] = true;
               }
             })
@@ -136,9 +136,9 @@
           sku_id: sku_ids.toString()
         }
         skus_warehouses(obj).then((res) => {
-          $.each(that.warehouseList, (i, item) => {
-            $.each(that.checkList, (i, m) => {
-              if(item.id == m){
+          that.warehouseList.forEach((item, x) => {
+            that.checkList.forEach((n, i) => {
+              if(item.id == n){
                 that.tableData[index]['warehouses'].push(item);
               }
             })

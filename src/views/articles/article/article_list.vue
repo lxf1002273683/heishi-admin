@@ -170,7 +170,7 @@
           user_id: this.user_id
         }
         if(obj){
-          $.extend(params, obj)
+          Object.assign(params, obj)
         }
         that.listLoading = true;
         article_list(params).then((res) => {
@@ -246,7 +246,7 @@
             });
             return false;
           }
-          $.each(res.result, (i, n) => {
+          res.result.forEach((n, i) => {
             n['postage'] = 0;
             that.add_types.unshift(n);
           })
@@ -296,7 +296,7 @@
         if(that.add_types[index]['id'] != 0){
           submit_type['sku_id'] = that.add_types[index]['id'];
           // 检测 当前待添加sku 是否已经在商品中
-          $.each(that.updateForm.types, (i, item) => {
+          that.updateForm.types.forEach((item, i) => {
             if(item.hk_sku_id == that.add_types[index]['id']){
               that.$message({
                 message: '此SKU已关联',
@@ -363,7 +363,7 @@
         const that = this;
         query_goods(id).then((res) => {
           // 增加一个实际库存参数，方便后面显示
-          $.each(res.types, (index, item) => {
+          res.types.forEach((item, index) => {
             item['reality_stock'] = 0;
           })
           that.updateForm = res;

@@ -230,7 +230,7 @@
           });
           return false;
         }
-        if(!this.addForm.price || !$.isNumeric(this.addForm.price)){
+        if(!this.addForm.price || isNaN(this.addForm.price)){
           that.$message({
             message: '请填写销售价格，注意格式是否正确',
             type: 'error'
@@ -262,7 +262,7 @@
         const that = this;
         const params = {};
         if(obj){
-          $.extend(params, obj)
+          Object.assign(params, obj)
         }
         that.listLoading = true;
         spus_list(params).then((res) => {
@@ -303,7 +303,7 @@
         const warehouse_ids = this.checkList;
         const spu_ids = [];
         const that = this;
-        $.each(this.multipleSelection, function(i, item){
+        this.multipleSelection.forEach((item, i) => {
           spu_ids.push(item.id);
         })
         const obj = {

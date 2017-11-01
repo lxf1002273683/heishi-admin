@@ -84,7 +84,7 @@
           role: 4
         }
         if(obj){
-          $.extend(params, obj)
+          Object.assign(params, obj)
         }
         that.listLoading = true;
         order_list(params).then((res) => {

@@ -119,7 +119,7 @@
           filter: '3'
         };
         if(obj){
-          $.extend(params, obj)
+          Object.assign(params, obj)
         }
         that.listLoading = true;
         request_list(params).then((res) => {

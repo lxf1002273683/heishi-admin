@@ -181,14 +181,14 @@
           role: 4
         }
         if(obj){
-          $.extend(params, obj)
+          Object.assign(params, obj)
         }
         that.listLoading = true;
         order_list(params).then((res) => {
           // 遍历 增加逾期时间
-          $.each(res.orders, (index, item) => {
+          res.orders.forEach((item, index) => {
             if(item['goods']){
-              $.each(item.goods, (i, n) => {
+              item.goods.forEach((n, i) => {
                 const timestamp = new Date(n.refund_apply_time).getTime() + 86400000*2;
                 n['overdue_time'] = parseTime(timestamp);
               })

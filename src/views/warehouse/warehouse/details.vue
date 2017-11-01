@@ -101,7 +101,7 @@
           sku_id: this.skuOptions
         };
         if(obj){
-          $.extend(params, obj)
+          Object.assign(params, obj)
         }
         that.listLoading = true;
         stocklogs(params).then((res) => {

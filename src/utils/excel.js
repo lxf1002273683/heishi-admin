@@ -1,7 +1,7 @@
 // 格式化数据
 function formatJSON(orders) {
   const arr = [];
-  $.each(orders, (index, item) => {
+  orders.forEach((item, index) => {
     const obj = {
       "收货人": null,'收货电话': null, '省': null, '市': null, '区': null, '详细地址': null, '邮编': null,
       '商品名称': null, '数量': null, '备注': null, '款式': null, '订单号': null};
@@ -25,7 +25,7 @@ function formatJSON(orders) {
       obj['备注'] = item.attach;
       obj['订单号'] = item.order_number;
       arr.push(obj);
-      $.each(item.goods, (i, n) => {
+      item.goods.forEach((n, i) => {
         // 退款状态中，退款完成的订单不导出
         if (n.process_status !== 25 && n.process_status !== 26) {
           const childObj = {
