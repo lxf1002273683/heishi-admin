@@ -148,14 +148,14 @@
           include_address: 1
         }
         if(obj){
-          $.extend(params, obj)
+          Object.assign(params, obj)
         }
         that.listLoading = true;
         order_list(params).then((res) => {
           // 添加退款状态 child_status
-          $.each(res.orders, (index, item) => {
+          res.orders.forEach((item, index) => {
             item['child_status'] = 0;
-            $.each(item.goods, (i, n) => {
+            item.goods.forEach((n ,i) => {
               if(n.process_status == 25 && n.tag == 0){
                 item['child_status'] = 1;
                 return false;
@@ -274,6 +274,7 @@
     }
     .btn{
       margin: 5px auto;
+      display: block;
     }
     .status2{
       color: #F7BA2A;

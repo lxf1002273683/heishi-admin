@@ -3,6 +3,7 @@
   <div class="app-container">
     <div class="skus_list">
       <el-table :data="tableData" style="width: 100%" stripe border v-loading.body="listLoading" element-loading-text="拼命加载中">
+        <el-table-column prop="id" label="ID" width="60"></el-table-column>
         <el-table-column prop="name" label="仓库名称">
           <template scope="scope">
             <span v-if="inputstatus != scope.$index">{{scope.row.name}}</span>

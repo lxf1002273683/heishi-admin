@@ -59,7 +59,7 @@
  // 整数类型判断
  export function numberInt(n) {
    let status = true;
-   if ($.isNumeric(n)) {
+   if (!isNaN(n)) {
      if (n % 1 === 0) {
       status = false;
      }

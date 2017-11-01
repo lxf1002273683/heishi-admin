@@ -151,12 +151,12 @@
           include_address: 1
         }
         if(obj){
-          $.extend(params, obj)
+          Object.assign(params, obj)
         }
         that.listLoading = true;
         order_list(params).then((res) => {
-          $.each(res.orders, (index, item) => {
-            $.each(item.goods, (i, n) => {
+          res.orders.forEach((item, index) => {
+            item.goods.forEach((n, i) => {
               // 增加子订单状态，方便添加class
               if(n.tag == 2)  n['class_status'] = 'status2';
               if(n.tag == 1)  n['class_status'] = 'status3';

@@ -153,13 +153,13 @@
             formData.append('title', that.addForm.title);
             formData.append('content', that.addForm.content);
             formData.append('images[]', that.addForm.cover);
-            $.each(that.uploadImageList, (index,item) => {
+            that.uploadImageList.forEach((item, index) =>{
               formData.append('images[]', item.response.uri);
             })
             // sku处理
             const skus = [];
             const type_status = false;
-            $.each(that.skuList, (index,item) => {
+            that.skuList.forEach((item, index) =>{
               // 检测款式长度
               if(item.type.length > 6){
                 that.$message({
@@ -235,7 +235,7 @@
         // 使用遍历添加到 uploadImageList
         const that = this;
         that.uploadImageList = [];
-        $.each(fileList, (index, item) => {
+        fileList.forEach((item, index) =>{
           that.uploadImageList.push(item);
         })
         imagesStatus(this);
@@ -279,7 +279,7 @@
             return false;
           }
           that.addForm.title = res.result[0]['spu_name'];
-          $.each(res.result, (index, item) => {
+          res.result.forEach((item, index) => {
             that.skuList.push(item);
           })
           // 进入填写步骤
@@ -301,7 +301,7 @@
             type: 'error'
           });
         }
-        $.extend(obj, this.add_types);
+        Object.assign(obj, this.add_types);
         this.skuList.push(obj);
         skuStatus(this);
       },

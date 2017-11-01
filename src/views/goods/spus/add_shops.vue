@@ -50,6 +50,8 @@
       renderContent:function(createElement, { node, data, store }) {
           var that = this;
           return createElement('span', [
+              createElement('span', data.id),
+              createElement('span', ' | '),
               createElement('span', node.label),
               // createElement('i', data.id),
               createElement('span', {attrs:{

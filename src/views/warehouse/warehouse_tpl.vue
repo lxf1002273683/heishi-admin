@@ -5,8 +5,10 @@
       <el-menu-item index="1">库房商品</el-menu-item>
       <el-menu-item index="2">未完成申请</el-menu-item>
       <el-menu-item index="3">历史申请入库</el-menu-item>
-      <el-menu-item index="4">出入库记录</el-menu-item>
+      <el-menu-item index="4">进货记录</el-menu-item>
       <el-menu-item index="5">邮费记录</el-menu-item>
+      <el-menu-item index="5">待发货</el-menu-item>
+      <el-menu-item index="5">已发货</el-menu-item>
     </el-menu>
     <div class="warehouse_content">
       <template v-if="activeIndex == 1"><CommodityInfo :warehouse_name="query.name" :warehouse_id="query.id"></CommodityInfo></template>

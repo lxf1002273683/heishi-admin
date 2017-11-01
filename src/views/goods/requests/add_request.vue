@@ -131,7 +131,10 @@
         },
         // 实际提交的数据
         addTable:[],
-        memo: ''
+        memo: '',
+        // 存储已获取的仓库，sku信息
+        warehouse_info: null,
+        sku_info: null,
       }
     },
     created() {
@@ -150,10 +153,10 @@
         this.$refs.addForm.validate((valid) => {
           if (valid) {
             const obj = {
-              sku_name: $('.select_sku_id').find('.el-input__inner').val(), // 使用jq获取val值
-              warehouse_name: $('.warehouse_lists').find('.el-input__inner').val()
+              sku_name: that.sku_info.spu_name + ' / ' + that.sku_info.type,
+              warehouse_name: that.warehouse_info.name
             };
-            $.extend(obj, that.addForm);
+            Object.assign(obj, that.addForm);
             that.addTable.push(obj);
             that.$refs.addForm.resetFields();
             that.skuOptions = '';
@@ -203,6 +206,10 @@
       },
       // sku选择
       selectChange(value) {
+        const activeSku = this.skuItems.find((item) => {
+          return item.sku_id === value;
+        })
+        this.sku_info = activeSku;
         if(value){
           this.addForm.sku_id = value.toString();
         }else{
@@ -211,9 +218,15 @@
       },
       // 仓库选择
       warehouseIdChange(value) {
+        const activeWarehouse = this.warehouse_lists.find((item) => {
+          return item.id === value;
+        })
+        this.warehouse_info = activeWarehouse;
         if(value){
           this.addForm.warehouse_id = value.toString();
         }
+        this.skuOptions = '';
+        this.skuItems = [];
       },
       // 时间选择
       pickerChange(value){

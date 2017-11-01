@@ -182,7 +182,7 @@
         request_info(id).then((res) => {
           that.addForm.index = index;
           that.addForm.parent_index = parent_index;
-          $.extend(that.addForm, res);
+          Object.assign(that.addForm, res);
         })
       },
       // 保质期选择
@@ -288,7 +288,7 @@
           filter: '0,1,2'
         }
         if(obj){
-          $.extend(params, obj)
+          Object.assign(params, obj)
         }
         that.listLoading = true;
         request_list(params).then((res) => {

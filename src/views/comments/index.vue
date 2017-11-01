@@ -129,7 +129,7 @@
         replyUserName: '',
         replytextarea: '',
         replyid: '',
-        read_comment: [],
+        read_comments: [],
         // 图片上传action
         action: this.$store.getters.hosts + '/warehouse/api/v1/images',
         // 图片上传headers设置
@@ -168,7 +168,7 @@
           receiver: this.user_id
         }
         if(obj){
-          $.extend(params, obj)
+          Object.assign(params, obj)
         }
         that.listLoading = true;
         comment_list(params).then((res) => {
@@ -204,7 +204,7 @@
         history_comment(id).then((res) => {
           that.comment_list = res;
           // 获取 买家向卖家的对话id
-          $.each(res, (i, item) => {
+          res.forEach((item, i) => {
             if(item.to_uid == that.seller_id){
               that.replyUserName = res[i]['from_nickname'];
               that.replyid = res[i]['id'];
@@ -259,16 +259,16 @@
       },
       // 批量选择标记已读
       handleSelectionChange(val){
-        this.read_comment = val;
+        this.read_comments = val;
       },
       // 批量标记
       add_read() {
         const that = this;
-        if(this.read_comment.length){
+        if(this.read_comments.length){
           const obj = {
             ids: []
           }
-          $.each(this.read_comment, (i, item) => {
+          this.read_comments.forEach((item, i) => {
             obj.ids.push(item.id);
           })
           read_comment(obj).then((res) => {
@@ -276,7 +276,7 @@
               message: '标记成功',
               type: 'success'
             });
-            $.each(that.read_comment, (i, item) => {
+            that.read_comments.forEach((item, i) => {
               item.status = 0;
             })
             that.$refs.multipleTable.clearSelection();

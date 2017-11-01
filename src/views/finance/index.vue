@@ -88,7 +88,7 @@
           page_size: 20
         };
         if(obj){
-          $.extend(params, obj)
+          Object.assign(params, obj)
         }
         that.listLoadingRequest = true;
         request_list(params).then((res) => {
@@ -104,7 +104,7 @@
           status_filter: '0',
         };
         if(obj){
-          $.extend(params, obj)
+          Object.assign(params, obj)
         }
         that.listLoadingPostage = true;
         payments_list(params).then((res) => {

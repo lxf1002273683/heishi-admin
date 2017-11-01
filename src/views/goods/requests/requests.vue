@@ -171,7 +171,7 @@
           filter: '-2,0,1,2'
         };
         if(obj){
-          $.extend(params, obj)
+          Object.assign(params, obj)
         }
         that.listLoading = true;
         request_list(params).then((res) => {
