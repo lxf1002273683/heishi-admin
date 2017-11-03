@@ -1,7 +1,7 @@
 /**
  * Created by jiachenpan on 16/11/18.
  */
-
+ 
  export function parseTime(time, cFormat) {
    if (arguments.length === 0) {
      return null;
@@ -65,5 +65,19 @@
      }
    }
    return status;
+ }
+
+ // 添加快捷导航
+ // 卖家操作界面暂时没有添加
+ export function addNav(that, path) {
+   const obj = {};
+   obj.url = path.fullPath;
+   obj.name = path.name;
+   const status = that.$store.getters.routerPath.find((item) => {
+     return item.url === path.fullPath;
+   })
+   if (!status) {
+     that.$store.dispatch('AddPath', obj)
+   }
  }
 

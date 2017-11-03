@@ -19,6 +19,8 @@
 
 <script>
   import { logins } from '@/api/admin';
+  import { addNav } from '@/utils/index';
+  
   export default {
     name: 'users',
     data() {
@@ -31,6 +33,7 @@
     created () {
       // 登录列表初始化
       this.getLoginsList()
+      addNav(this, this.$route);
     },
     methods: {
       handleCurrentChange(val) {

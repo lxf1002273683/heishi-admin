@@ -21,6 +21,7 @@
   import AddSpus from './spus/add_spus';
   import AddShops from './spus/add_shops';
   import AddCategories from './spus/add_categories';
+  import { addNav } from '@/utils/index';
 
   export default {
     components: {
@@ -33,6 +34,9 @@
       return {
         activeIndex: '1'
       }
+    },
+    created() {
+      addNav(this, this.$route);
     },
     methods: {
       // 切换nav

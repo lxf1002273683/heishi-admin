@@ -15,6 +15,7 @@
 <script>
   import Warehouses from './warehouses/warehouses';
   import AddWarehouses from './warehouses/add_warehouse';
+  import { addNav } from '@/utils/index';
 
   export default {
     components: {
@@ -25,6 +26,9 @@
       return {
         activeIndex: '1'
       }
+    },
+    created() {
+      addNav(this, this.$route);
     },
     methods: {
       // 切换nav

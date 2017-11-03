@@ -64,7 +64,7 @@ const OrdersTpl = _import('orders/orders_tpl');
 const Account = _import('account/index');
 
 /* 财务管理 */
-const Finance = _import('finance/index');
+const FinanceTpl = _import('finance/finance_tpl');
 
 Vue.use(Router);
 
@@ -146,7 +146,7 @@ export const asyncRouterMap = [
     name: '财务管理',
     meta: { role: [256] },
     children: [
-      { path: 'finance', component: Finance, name: '审核列表' }
+      { path: 'finance', component: FinanceTpl, name: '审核列表' }
     ]
   },
   { path: '*', redirect: '/404', hidden: true }
