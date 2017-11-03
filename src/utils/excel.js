@@ -3,7 +3,7 @@ function formatJSON(orders) {
   const arr = [];
   orders.forEach((item, index) => {
     const obj = {
-      "收货人": null,'收货电话': null, '省': null, '市': null, '区': null, '详细地址': null, '邮编': null,
+      "收货人": null, '收货电话': null, '省': null, '市': null, '区': null, '详细地址': null, '邮编': null,
       '商品名称': null, '数量': null, '备注': null, '款式': null, '订单号': null};
     obj['收货人'] = item.consignee_name;
     obj['收货电话'] = item.phone;

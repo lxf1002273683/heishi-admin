@@ -7,8 +7,8 @@
       <el-menu-item index="3">历史申请入库</el-menu-item>
       <el-menu-item index="4">进货记录</el-menu-item>
       <el-menu-item index="5">邮费记录</el-menu-item>
-      <el-menu-item index="5">待发货</el-menu-item>
-      <el-menu-item index="5">已发货</el-menu-item>
+      <el-menu-item index="6">待发货</el-menu-item>
+      <el-menu-item index="7">已发货</el-menu-item>
     </el-menu>
     <div class="warehouse_content">
       <template v-if="activeIndex == 1"><CommodityInfo :warehouse_name="query.name" :warehouse_id="query.id"></CommodityInfo></template>
@@ -16,6 +16,8 @@
       <template v-if="activeIndex == 3"><FinishWarehouse :warehouse_name="query.name" :warehouse_id="query.id"></FinishWarehouse></template>
       <template v-if="activeIndex == 4"><Detail :warehouse_name="query.name" :warehouse_id="query.id"></Detail></template>
       <template v-if="activeIndex == 5"><Postage :warehouse_name="query.name" :warehouse_id="query.id"></Postage></template>
+      <template v-if="activeIndex == 6"><Untreated :warehouse_name="query.name" :warehouse_id="query.id"></Untreated></template>
+      <template v-if="activeIndex == 7"><Delivered :warehouse_name="query.name" :warehouse_id="query.id"></Delivered></template>
     </div>
   </div>
 </template>
@@ -25,6 +27,9 @@
   import FinishWarehouse from './warehouse/finish_warehouse';
   import Detail from './warehouse/details';
   import Postage from './warehouse/postage';
+  import Untreated from './warehouse/untreated';
+  import Delivered from './warehouse/delivered';
+  import { addNav } from '@/utils/index';
 
   export default {
     components: {
@@ -32,7 +37,9 @@
       Warehouse,
       FinishWarehouse,
       Detail,
-      Postage
+      Postage,
+      Untreated,
+      Delivered
     },
     data() {
       return {
@@ -42,6 +49,9 @@
           id: this.$route.query.id,
         }
       }
+    },
+    created() {
+      addNav(this, this.$route);
     },
     methods: {
       // 切换nav

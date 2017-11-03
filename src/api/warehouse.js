@@ -104,3 +104,13 @@ export function delete_skus(form) {
   });
 }
 
+// 获取黑市推过来的订单
+export function orders_list(warehouse_id, form) {
+  return fetch({
+    url: '/warehouse/api/v1/warehouse/' + warehouse_id + '/invoices',
+    method: 'get',
+    params: form
+  });
+}
+
+

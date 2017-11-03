@@ -21,6 +21,8 @@
   import AddUser from './users/add_user';
   import UpdateUser from './users/update_user';
   import ModulePrivilege from './users/module_privilege';
+  import { addNav } from '@/utils/index';
+
   export default {
     components: {
       Users,
@@ -32,6 +34,9 @@
       return {
         activeIndex: '1'
       }
+    },
+    created() {
+      addNav(this, this.$route);
     },
     methods: {
       // 切换nav

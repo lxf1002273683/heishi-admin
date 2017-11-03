@@ -89,7 +89,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="收货地址" min-width="200">
+        <el-table-column label="快递" min-width="200">
           <template scope="scope">
             <el-input placeholder="请输入快递公司" v-model="scope.row.express_name" size="small">
               <template slot="prepend">快递公司</template>

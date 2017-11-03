@@ -4,7 +4,6 @@
     <el-collapse v-model="activeNames">
       <el-collapse-item title="修改密码" name="1">
         <el-form ref="form" :model="form"  autoComplete="on"  label-width="80px" :rules="loginRules">
-
           <el-form-item label="当前密码" prop="password">
             <el-input v-model="form.password"></el-input>
           </el-form-item>

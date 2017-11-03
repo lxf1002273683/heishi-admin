@@ -18,6 +18,7 @@
   import Request from './requests/requests';
   import FinishRequests from './requests/finish_requests';
   import AddRequest from './requests/add_request';
+  import { addNav } from '@/utils/index';
 
   export default {
     components: {
@@ -29,6 +30,9 @@
       return {
         activeIndex: '1'
       }
+    },
+    created() {
+      addNav(this, this.$route);
     },
     methods: {
       // 切换nav
