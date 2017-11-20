@@ -69,7 +69,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="价格" min-width="80">
+        <el-table-column label="单价" min-width="80">
           <template scope="scope">
             <div class="content-rowspan" >
               <div v-for="(item, index) in scope.row.goods" :class="[(index % 2) == 1 ? 'eveRow': 'oddRow', item.class_status]">{{ item.price }}</div>

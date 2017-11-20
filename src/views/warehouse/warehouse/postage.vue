@@ -56,6 +56,7 @@
         const that = this;
         const params = {
           status_filter: '0,1,-2',
+          warehouse_id: this.warehouse_id
         };
         if(obj){
           Object.assign(params, obj)

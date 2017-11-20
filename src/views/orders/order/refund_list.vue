@@ -29,18 +29,11 @@
               <el-form-item label="邮费:">
                 <span>{{ props.row.postage }}</span>
               </el-form-item>
-              <el-form-item label="总价:">
-                <span v-if="props.row.goods" class="content-rowspan" >
-                  <span>{{props.row.total_fee}}</span>
-                </span>
-                <span v-if="!props.row.goods">
-                  {{props.row.total_fee + props.row.postage}}
-                </span>
-              </el-form-item>
-              <!-- <el-form-item label="订单类型:">
+              
+              <el-form-item label="订单类型:">
                 <span v-if="props.row.type == 1">正常订单</span>
                 <span v-if="props.row.type != 1">购物车订单</span>
-              </el-form-item> -->
+              </el-form-item>
               <el-form-item label="时间:">
                 <span>{{ props.row.create_time }}</span>
               </el-form-item>
@@ -80,7 +73,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="价格" min-width="80">
+        <el-table-column label="单价" min-width="80">
           <template scope="scope">
             <div v-if="scope.row.goods" class="content-rowspan" >
               <div v-for="(item, index) in scope.row.goods" :class="(index % 2) == 1 ? 'eveRow': 'oddRow'">{{item.price}}</div>
@@ -88,6 +81,16 @@
             <div v-if="!scope.row.goods">
               {{scope.row.price}}
             </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="总价" min-width="80">
+          <template scope="scope">
+            <span v-if="scope.row.goods || scope.row.type == 1" class="content-rowspan" >
+              <span>{{scope.row.total_fee}}</span>
+            </span>
+            <span v-else>
+              {{scope.row.total_fee + scope.row.postage}}
+            </span>
           </template>
         </el-table-column>
         <el-table-column label="逾期时间(到期自动退款)" min-width="80">

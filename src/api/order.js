@@ -51,8 +51,7 @@ export function order_number_search(n, that) {
     return false;
   }
   const obj = {
-    order_number: that.order_num,
-    status: that.selectInput
+    order_number: that.order_num
   }
   that.initOrderList(obj);
 }
@@ -63,8 +62,7 @@ export function name_tel_search(n, that) {
     return false;
   }
   const obj = {
-    keyword: that.keyword,
-    status: that.selectInput
+    keyword: that.keyword
   }
   that.initOrderList(obj);
 }

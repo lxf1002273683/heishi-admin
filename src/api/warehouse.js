@@ -113,4 +113,21 @@ export function orders_list(warehouse_id, form) {
   });
 }
 
+// 仓库发货单发货
+export function order_deliver(warehouse_id, form) {
+  return fetch({
+    url: '/warehouse/api/v1/warehouse/invoice/' + warehouse_id + '/deliver',
+    method: 'post',
+    data: form
+  });
+}
+
+// 仓库发货单批量发货
+export function orders_deliver(form) {
+  return fetch({
+    url: '/warehouse/api/v1/warehouse/invoices/deliver',
+    method: 'post',
+    data: form
+  });
+}
 

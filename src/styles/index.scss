@@ -74,11 +74,14 @@ a:hover {
   max-width: 560px !important;
 }
 //步骤条 宽度限制
+.el-steps{
+  min-width: 500px !important;
+}
 .el-step__description{
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  max-width: 370px !important;
+  max-width: 450px !important;
 }
 //table 
 .el-table .info-row {
@@ -114,4 +117,10 @@ a:hover {
 }
 .el-table .cell {
   padding: 0 10px !important;
+}
+.app-main .el-menu .el-menu-item{
+  border-bottom-width: 3px  !important;
+}
+.app-main .el-menu .is-active{
+  border-bottom: 3px solid #20a0ff !important;
 }
