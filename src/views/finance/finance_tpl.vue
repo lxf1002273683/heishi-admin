@@ -6,10 +6,8 @@
       <el-menu-item index="2">增加邮费列表</el-menu-item>
     </el-menu>
     <div class="finance_content">
-      <keep-alive>
       <template v-if="activeIndex == 1"><RequestList :warehouse_name="query.name" :warehouse_id="query.id"></RequestList></template>
       <template v-if="activeIndex == 2"><PostageList :warehouse_name="query.name" :warehouse_id="query.id"></PostageList></template>
-      </keep-alive>
     </div>
   </div>
 </template>

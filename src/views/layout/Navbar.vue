@@ -79,8 +79,8 @@
             right: 35px;
             .avatar-wrapper {
                 cursor: pointer;
-                margin-top: 5px;
                 position: relative;
+                margin: 5px 20px;
                 .user-avatar {
                     width: 40px;
                     height: 40px;

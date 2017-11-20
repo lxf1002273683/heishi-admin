@@ -69,7 +69,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="价格" min-width="80">
+        <el-table-column label="单价" min-width="80">
           <template scope="scope">
             <div class="content-rowspan" >
               <div v-for="(item, index) in scope.row.goods" :class="[(index % 2) == 1 ? 'eveRow': 'oddRow', item.class_status]">{{ item.price }}</div>
@@ -103,27 +103,19 @@
       <el-pagination v-if="totalPages > 10" layout="prev, pager, next" :total="totalPages" @current-change="handleCurrentChange" class='pagination'></el-pagination>
     </div>
     <el-dialog title="收货地址" :visible.sync="dialogStatus" top="5%" class="orders_list" size="small" @close="dialogClose">
-      <div class="dialog">
-        <p class="title">{{express.msg}}</p>
-        <p>快递: {{express.expTextName}}</p>
-        <p>单号: {{express.mailNo}}</p>
-        <p>电话: {{express.tel}}</p>
-        <div v-if="activeNum">
-          <el-steps :space="200" :active="activeNum" direction="vertical" space="80px">
-            <template v-for="item in express.data">
-              <el-step :title="item.time" :description="item.context"></el-step>
-            </template>
-          </el-steps>
-        </div>
-      </div>
+      <Express :express="express" :activeNum="activeNum"></Express>
     </el-dialog>
   </div>
 </template>
 <script>
   import { order_list, order_number_search, name_tel_search, express_info } from '@/api/order';
+  import Express from '@/components/ExpressCheck/index';
 
   export default {
     props: ['user_name', 'user_id', 'hs_id'],
+    components: {
+      Express
+    },
     data() {
       return {
         tableData: [],

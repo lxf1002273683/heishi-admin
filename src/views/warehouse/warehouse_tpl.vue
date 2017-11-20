@@ -9,6 +9,7 @@
       <el-menu-item index="5">邮费记录</el-menu-item>
       <el-menu-item index="6">待发货</el-menu-item>
       <el-menu-item index="7">已发货</el-menu-item>
+      <el-menu-item index="8">批量发货</el-menu-item>
     </el-menu>
     <div class="warehouse_content">
       <template v-if="activeIndex == 1"><CommodityInfo :warehouse_name="query.name" :warehouse_id="query.id"></CommodityInfo></template>
@@ -18,6 +19,7 @@
       <template v-if="activeIndex == 5"><Postage :warehouse_name="query.name" :warehouse_id="query.id"></Postage></template>
       <template v-if="activeIndex == 6"><Untreated :warehouse_name="query.name" :warehouse_id="query.id"></Untreated></template>
       <template v-if="activeIndex == 7"><Delivered :warehouse_name="query.name" :warehouse_id="query.id"></Delivered></template>
+      <template v-if="activeIndex == 8"><BatchDelivery :warehouse_name="query.name" :warehouse_id="query.id"></BatchDelivery></template>
     </div>
   </div>
 </template>
@@ -29,6 +31,7 @@
   import Postage from './warehouse/postage';
   import Untreated from './warehouse/untreated';
   import Delivered from './warehouse/delivered';
+  import BatchDelivery from './warehouse/batch_delivery';
   import { addNav } from '@/utils/index';
 
   export default {
@@ -39,7 +42,8 @@
       Detail,
       Postage,
       Untreated,
-      Delivered
+      Delivered,
+      BatchDelivery
     },
     data() {
       return {

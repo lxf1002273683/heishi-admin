@@ -234,8 +234,8 @@ export function modulesConfig(userIds) {
   const businessaRouterMap = [
     articles,
     comments,
-    orders,
-    account
+    orders
+    // account
   ];
   return businessaRouterMap;
 }

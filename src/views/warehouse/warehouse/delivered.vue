@@ -1,255 +1,149 @@
 <!-- 待操作入库申请 -->
 <template>
   <div class="app-container">
-    <div class="warehouse_list">
+    <div class="order_list">
       <div class="search">
-        <span class="search_title">商品查询：</span>
-        <el-select v-model="skuOptions" filterable clearable remote placeholder="请输入查询的商品名称" :remote-method="remoteMethod" :loading="loading"  @change="selectChange" class="select_sku_id searchInput">
-            <el-option v-for="item in skuItems" :key="item.value" :label="item.spu_name+'/'+item.type" :value="item.id">
-              <span>{{ item.spu_name+'/'+item.type }}</span>
-            </el-option>
-          </el-select>
+        <span class="title">姓名:</span>
+        <el-input class="search_inp" placeholder="请输入买家名" v-model="customer_name" @change="empty"></el-input>
+        <span class="title">电话:</span>
+        <el-input class="search_inp" placeholder="请输入电话" v-model="customer_telphone" @change="empty">
+          <el-button slot="append" icon="search" @click="search"></el-button>
+        </el-input>
       </div>
-      <el-collapse v-model="activeNames" v-loading.body="listLoading" element-loading-text="拼命加载中">
-        <template v-for="(item, index) in tableData">
-          <el-collapse-item :name="item.id">
-            <template slot="title">
-              <span>{{item.batch_number}}</span>
-              <span class="user">申请人 : {{item.requester.account}}</span>
-              <span class="time">{{item.created_at}}</span>
-            </template>
-            <el-table :data="item.batches" style="width: 100%" stripe border >
-              <el-table-column prop="id" label="子批次ID" width="95"></el-table-column>
-              <el-table-column prop="sku.spu_name" label="商品名称"></el-table-column>
-              <el-table-column prop="sku.type" label="款式"></el-table-column>
-              <el-table-column prop="purchasing_price" label="商品进价"></el-table-column>
-              <el-table-column prop="quantity" label="进货数量"></el-table-column>
-              <el-table-column prop="actual_quantity" label="已入库数量"></el-table-column>
-              <el-table-column prop="sale_priority" label="销售优先级"></el-table-column>
-              <el-table-column prop="presale_quantity" label="预售数量"></el-table-column>
-              <el-table-column label="操作" width="110">
-                <template scope="scope">
-                  <!-- 传入单个申请的id，进行具体信息查询 -->
-                  <el-button v-if="scope.row.sale_status != 0 && scope.row.sale_status != 4 && scope.row.sale_status != 1" size="small" @click="finishCommodity(scope.row.id,scope.$index,index)">完成入库</el-button>
-                  <el-button v-if="scope.row.sale_status != 0 && scope.row.sale_status != 4" size="small" @click="dialogOpen(scope.row.id,scope.$index,index)">
-                    部分入库
-                  </el-button>
-                  <el-button v-if="scope.row.sale_status != 0 && scope.row.sale_status != 4" size="small" @click="presellCommodity(scope.row.id,scope.$index,index)">
-                    预售商品
-                  </el-button>
-                  <span v-if="scope.row.sale_status == 4" style="color: #20a0ff;">已入库</span>
-                  <span v-if="scope.row.sale_status == 0" style="color: red;">待审核</span>
-                </template>
-              </el-table-column>
-            </el-table>
-          </el-collapse-item>
-        </template>
-      </el-collapse>
+      <el-table :data="tableData" style="width: 100%" stripe border v-loading.body="listLoading">
+        <el-table-column prop="seller_nickname" label="卖家" ></el-table-column>
+        <el-table-column prop="receiver_name" label="买家名称" ></el-table-column>
+        <el-table-column prop="receiver_telphone" label="联系电话"></el-table-column>
+        <el-table-column label="地址">
+          <template scope="scope">
+            <span>
+              {{scope.row.receiver_address_province}}{{scope.row.receiver_address_city}}{{scope.row.receiver_address_district}}{{scope.row.receiver_address_description}}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column label="订单号" width="220">
+          <template scope="scope">
+            <div class="content-rowspan">
+              <div v-for="item in scope.row.subinvoices">{{item.order_number}}</div>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="文章">
+          <template scope="scope">
+            <div class="content-rowspan">
+              <div v-for="item in scope.row.subinvoices">{{item.object_title}}</div>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="类型">
+          <template scope="scope">
+            <div class="content-rowspan">
+              <div v-for="item in scope.row.subinvoices">{{item.object_type_desc}}</div>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="SKU" min-width="180">
+          <template scope="scope">
+            <div class="content-rowspan">
+              <div v-for="item in scope.row.subinvoices">{{item.sku.spu.name}} / {{item.sku.type}}</div>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="数量" width="60">
+          <template scope="scope">
+            <div class="content-rowspan">
+              <div v-for="item in scope.row.subinvoices">{{item.quantity}}</div>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="memo" label="备注"></el-table-column>
+        <el-table-column label="操作" width="90">
+          <template scope="scope">
+            <el-button size="small" class="btn" @click="expressInfo(scope.row.subinvoices[0].order_number)">快递信息</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
       <el-pagination v-if="totalPages > 10" layout="prev, pager, next" :total="totalPages" @current-change="handleCurrentChange" class='pagination'>
       </el-pagination>
     </div>
-    <el-dialog title="入库申请" :visible.sync="dialogStatus" top="5%">
-      <div>
-        <el-form label-width="80px" :model="addForm" ref="addForm" class="addForm" :rules="rules">
-          <el-form-item label="申请人" prop="requester.account">
-            <el-input v-model="addForm.requester.account" :disabled="true"></el-input>
-          </el-form-item>
-          <el-form-item label="商品名称" prop="sku.spu_name">
-            <el-input v-model="addForm.sku.spu_name" :disabled="true"></el-input>
-          </el-form-item>
-          <el-form-item label="商品类型" prop="sku.type">
-            <el-input v-model="addForm.sku.type" :disabled="true"></el-input>
-          </el-form-item>
-          <el-form-item label="商品进价" prop="purchasing_price">
-            <el-input v-model="addForm.purchasing_price" :disabled="true"></el-input>
-          </el-form-item>
-          <el-form-item label="进货数量" prop="quantity">
-            <el-input v-model="addForm.quantity" :disabled="true"></el-input>
-          </el-form-item>
-          <el-form-item label="进货渠道" prop="purchasing_channel">
-            <el-input v-model="addForm.purchasing_channel"></el-input>
-          </el-form-item>
-          <el-form-item label="商品规格" prop="specification">
-            <el-input v-model="addForm.specification"></el-input>
-          </el-form-item>
-          <el-form-item label="生产厂家" prop="manufacturer">
-            <el-input v-model="addForm.manufacturer" placeholder="可不填写"></el-input>
-          </el-form-item>
-          <el-form-item label="产地" prop="origin">
-            <el-input v-model="addForm.origin" placeholder="可不填写"></el-input>
-          </el-form-item>
-          <el-form-item label="颜色" prop="color">
-            <el-input v-model="addForm.color" placeholder="可不填写"></el-input>
-          </el-form-item>
-          <el-form-item label="尺寸" prop="size">
-            <el-input v-model="addForm.size" placeholder="可不填写"></el-input>
-          </el-form-item>
-          <el-form-item label="毛重" prop="weight">
-            <el-input v-model="addForm.weight" placeholder="可不填写"></el-input>
-          </el-form-item>
-          <el-form-item label="优先级" prop="sale_priority">
-            <el-input v-model="addForm.sale_priority"></el-input>
-          </el-form-item>
-          <el-form-item label="已入库数">
-            <el-input :value="addForm.actual_quantity" :disabled="true"></el-input>
-          </el-form-item>
-          <el-form-item label="入库数量" prop="wait_quantity">
-            <el-input v-model.number="addForm.wait_quantity" placeholder="残次品请不要入库"></el-input>
-          </el-form-item>
-          <el-form-item label="保质期" prop="shelf_life">
-            <el-date-picker class="picker" v-model="addForm.shelf_life" align="right" format="yyyy-MM-dd" type="date" placeholder="可不填写" @change='expirationPickerChange'>
-            </el-date-picker>
-          </el-form-item>
-          <el-form-item label="入库时间" prop="arrival_time">
-            <el-date-picker class="picker" v-model="addForm.arrival_time" align="right" format="yyyy-MM-dd" type="date" placeholder="默认当前时间" @change='arrivalPickerChange'>
-            </el-date-picker>
-          </el-form-item>
-          <el-form-item label="申请备注" prop="request_memo">
-            <el-input v-model="addForm.request_memo" type="textarea" :autosize="{ minRows: 2, maxRows: 4}" :disabled="true"></el-input>
-          </el-form-item>
-          <el-form-item label="备注" prop="memo">
-            <el-input v-model="addForm.memo" type="textarea" :autosize="{ minRows: 2, maxRows: 4}" placeholder="破损原因，等其他信息记录"></el-input>
-          </el-form-item>
-        </el-form>
-      </div>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogStatus = false">取 消</el-button>
-        <el-button type="primary" @click="addRequest">确 定</el-button>
-      </div>
+    <el-dialog title="收货地址" :visible.sync="dialogStatus" top="5%" class="orders_list" size="small" @close="dialogClose">
+      <Express :express="express" :activeNum="activeNum"></Express>
     </el-dialog>
   </div>
 </template>
 <script>
-  import { request_list, request_info } from '@/api/goods';
-  import { update_scale, pass_request, part_request, get_skus } from '@/api/warehouse';
+  import { orders_list, order_deliver, orders_deliver } from '@/api/warehouse';
+  import { express_info } from '@/api/order';
+  import Express from '@/components/ExpressCheck/index';
 
   export default {
     // 仓库id name
     props: ['warehouse_name', 'warehouse_id'],
+    components: {
+      Express
+    },
     data() {
       return {
-        addForm: {
-          parent_index: '',     // 批次id
-          index: '',     // 表格位置
-          id: '',               // 单个批次id
-          sku: {
-            spu_name: '',       // 商品名称
-            type: '',           // 商品类型
-          },
-          requester: {
-            account: ''         //申请人
-          },
-          specification: '',    // 商品规格
-          shelf_life: '',       // 保质期
-          purchasing_price: '', // 商品进价
-          quantity: '',         // 进货数量
-          actual_quantity: '',  // 当前库存
-          wait_quantity: '',     // 要入库数量
-          arrival_time: '',     // 入库时间
-          origin: '',           // 产地
-          color: '',            // 颜色
-          size: '',             // 尺寸
-          weight: '',           // 毛重
-          manufacturer: '',     // 生成厂家
-          memo: '',             // 备注
-          request_memo: '',     // 申请人备注
-          sale_priority: 0,     // 销售优先级
-          purchasing_channel: ''// 进货渠道
-        },
-        rules: {
-          wait_quantity: [{ required: true, message: '请填写商品进价'},{ type: 'number', message: '必须为数字值'}],
-        },
-        activeNames: '',
         tableData: [],
-        // 分页
         totalPages: 0,
-        skuOptions: '',
-        loading: false,
-        skuItems: [],
-        // dialog显示状态
+        listLoading: false,
+        customer_name: null,
+        customer_telphone: null,
+        express: null,
         dialogStatus: false,
-        listLoading: true
+        activeNum: 0
       }
     },
     created() {
-      this.initRequestList();
+      this.initOrderList();
     },
     methods: {
-      // 打开模态框并且传入入库申请的id
-      dialogOpen(id, index, parent_index) {
+      // 订单列表
+      initOrderList(obj) {
         const that = this;
-        that.dialogStatus = true;
-        request_info(id).then((res) => {
-          that.addForm.index = index;
-          that.addForm.parent_index = parent_index;
-          Object.assign(that.addForm, res);
+        const params = {
+          page_size: 10,
+          delivered: 1
+        };
+        if(obj){
+          Object.assign(params, obj)
+        }
+        that.listLoading = true;
+        orders_list(this.warehouse_id, params).then((res) => {
+          that.tableData = res.data;
+          that.totalPages = res.total;
+          that.listLoading = false;
         })
       },
-      // 保质期选择
-      expirationPickerChange(value) {
-        if(value){
-          this.addForm.expiration_time = value;
-        }else{
-          this.addForm.expiration_time = '';
-        }
-      },
-      // 入库时间选择
-      arrivalPickerChange(value) {
-        if(value){
-          this.addForm.arrival_time = value;
-        }else{
-          this.addForm.arrival_time = '';
-        }
-      },
-      // 翻页
+      // 分页
       handleCurrentChange(val) {
         const obj = {
           page: val
         }
-        // 在翻页时判断是否存在搜索条件
-        if(this.skuOptions){
-          obj.sku_id = this.skuOptions
+        obj.customer_name = this.customer_name;
+        obj.customer_telphone = this.customer_telphone;
+        this.initOrderList(obj);
+      },
+      // 搜索
+      search() {
+        const obj = {};
+        obj.customer_name = this.customer_name;
+        obj.customer_telphone = this.customer_telphone;
+        this.initOrderList(obj);
+      },
+      // 搜索条件为空
+      empty() {
+        if(!this.customer_name && !this.customer_telphone){
+          this.initOrderList();
         }
-        this.initRequestList(obj);
       },
-      // 部分入库
-      addRequest() {
-        const that =this;
-        this.$refs.addForm.validate((valid) => {
-          if (valid) {
-            // 判断用户输入的数量是否已经超过 进货数量
-            const status = (that.addForm.actual_quantity + that.addForm.wait_quantity) > that.addForm.quantity;
-            if (status) {
-              that.$confirm('请注意，库存数量超过进货数量，是否继续?', '提示', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-                type: 'warning'
-              }).then(() => {
-                that.addForm.actual_quantity = that.addForm.wait_quantity;
-                that.part_request(that.addForm.wait_quantity);
-              }).catch(() => {});
-            } else {
-              that.addForm.actual_quantity = that.addForm.wait_quantity;
-              that.part_request(that.addForm.wait_quantity);
-            }
-          } else {
-            return false;
-          }
-        });
-      },
-      // 部分入库请求
-      part_request(num) {
+      //查询收货地址
+      expressInfo(orderNumber) {
         const that = this;
-        part_request(that.addForm.id, that.addForm).then(() => {
-          that.$message({
-            message: '入库成功',
-            type: 'success'
-          });
-          that.dialogStatus = false;
-          that.$refs.addForm.resetFields();
-          // 入库成功后将此条状态更改 显示完成入库
-          that.tableData[that.addForm.parent_index].batches[that.addForm.index].sale_status = 2;
-          that.tableData[that.addForm.parent_index].batches[that.addForm.index].actual_quantity += num;
+        express_info(orderNumber).then((res) => {
+          that.dialogStatus = true;
+          that.express = res;
+          that.activeNum = res.dataSize;
         },(error) => {
           that.$message({
             message: error.message,
@@ -257,125 +151,52 @@
           });
         })
       },
-      // 远程搜索sku
-      remoteMethod(query) {
-        const that = this;
-        const obj = {
-          keywords: query
-        }
-        get_skus(this.warehouse_id, obj).then((res) => {
-          that.skuItems = res.data;
-        })
-      },
-      // 拿到sku后，搜索对应的入库申请
-      selectChange(value) {
-        if(value){
-          const that = this
-          const obj = {
-            sku_id: value
-          }
-          this.initRequestList(obj);
-        }else{
-          const obj = {};
-          this.initRequestList();
-        }
-      },
-      // 初始化入库申请列表 默认带有仓库id
-      initRequestList(obj) {
-        const that = this;
-        const params = {
-          warehouse_id: this.warehouse_id,
-          filter: '0,1,2'
-        }
-        if(obj){
-          Object.assign(params, obj)
-        }
-        that.listLoading = true;
-        request_list(params).then((res) => {
-          that.tableData = res.data;
-          that.totalPages = res.total;
-          that.listLoading = false;
-        })
-      },
-      // 预售商品
-      presellCommodity(id, index, parent_index) {
-        const that = this;
-        this.$prompt('请输入预售数量', '预售商品', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          inputPattern: /[0-9]+?/,
-          inputErrorMessage: '格式不正确'
-        }).then(({ value }) => {
-          // 获取预售的数量
-          update_scale(id, value).then((res) => {
-            that.$message({
-              type: 'success',
-              message: res
-            });
-            // 叠加预售数量
-            that.tableData[parent_index].batches[index].presale_quantity += parseInt(value);
-          },(error) => {
-            that.$message({
-              type: 'error',
-              message: '预售数量累计不能大于请求入库数量'
-            });
-          })
-        }).catch(() => {});
-      },
-      // 完成入库操作
-      finishCommodity(id, index, parent_index) {
-        const that = this;
-        that.$confirm('是否确认商品已全部入库?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          pass_request(id).then((res) => {
-            that.$message({
-              message: '入库成功',
-              type: 'success'
-            });
-          })
-          // 入库成功后将此条状态更改
-          that.tableData[parent_index].batches[index].sale_status = 4;
-        }).catch(() => {});
+      dialogClose() {
+        this.express = {};
+        this.activeNum = 0;
       }
     }
   };
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>
-  .warehouse_list{
+  .order_list{
     .pagination{
       text-align: center;
       padding: 20px 0;
     }
-    .hiddenbox{
-      display: none;
+    .content-rowspan div {
+      padding: 0 18px;
+      line-height: 28px;
+      min-height: 28px;
+      border-bottom: 1px solid #ECEDEE;
+      right: -18px;
+      margin-left: -36px;
+      position: relative;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+    .content-rowspan div:last-child {
+      border-bottom: 0;
     }
     .search{
-      .search_title{
+      padding: 10px;
+      &:after{
+        content: '';
+        display: block;
+        clear: both;
+      }
+      .title{
+        float: left;
+        line-height: 36px;
         font-size: 14px;
-        color: #1f2d3d;
+        cursor: default;
       }
-      .searchInput{
-        width: 240px;
-        padding: 0 20px 20px 0;
+      .search_inp{
+        width: 280px;
+        float: left;
+        margin: 0 20px;
       }
-    }
-    .el-button{
-      margin: 3px 0;
-    }
-    .user{
-      margin-left: 20px;
-    }
-    .time{
-      float: right;
-      margin-right: 10px;
-    }
-  }
-  .addForm{
-    .picker{
-      width: 100%;
     }
   }
 </style>

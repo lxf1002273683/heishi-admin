@@ -55,13 +55,10 @@
                   <el-input placeholder="请输入库存" size="mini" v-model="scope.row.goodsPrice"></el-input>
                 </template>
               </el-table-column>
-              <el-table-column label="库存" width="140">
+              <el-table-column label="库存" width="120">
                 <template scope="scope">
                   <el-input placeholder="请输入库存" size="mini" v-model="scope.row.goodsStock" class="stock"></el-input>
-                  <el-button type="text" @click.once="query_stock(scope.row.hk_sku_id,scope.$index)"  class="btn" size="mini" >
-                    <span v-if="scope.row.reality_stock > 0">{{scope.row.reality_stock}}</span>
-                    <span v-else>商品库存</span>
-                  </el-button>
+                  <span class="reality_stock" v-if="scope.row.skus_info != null">{{scope.row.skus_info.quantity}}</span>
                 </template>
               </el-table-column>
               <el-table-column label="邮费"  prop="postage" width="70">
@@ -69,7 +66,12 @@
                   <el-input placeholder="请输入库存" size="mini" v-model="scope.row.postage"></el-input>
                 </template>
               </el-table-column>
-              <el-table-column label="SKU"  prop="hk_sku_id" width="70"></el-table-column>
+              <el-table-column label="商品查询"  prop="hk_sku_id" width="80">
+                <template scope="scope">
+                  <span v-if="scope.row.skus_info != null">{{scope.row.skus_info.spu_name}}/{{scope.row.skus_info.type}}</span>
+                  <el-button v-if="scope.row.skus_info == null && scope.row.hk_sku_id != 0" type="text" @click.once="query_stock(scope.row.hk_sku_id,scope.$index)"  class="btn" size="mini" >商品查询</el-button>
+                </template>
+              </el-table-column>
               <el-table-column label="操作" width="130">
                 <template scope="scope">
                   <el-button class="btn" size="small" @click.stop="updateSku(updateForm.id,scope.$index)">修改</el-button>
@@ -355,7 +357,12 @@
       query_stock(id, index) {
         const that = this;
         sku_info(id).then((res) => {
-          that.updateForm.types[index]['reality_stock'] = res.quantity;
+          that.updateForm.types[index]['skus_info'] = res;
+        },(error) => {
+          that.$message({
+            type: 'error',
+            message: error.message
+          })
         })
       },
       // 查询商品详情
@@ -364,7 +371,7 @@
         query_goods(id).then((res) => {
           // 增加一个实际库存参数，方便后面显示
           res.types.forEach((item, index) => {
-            item['reality_stock'] = 0;
+            item['skus_info'] = null;
           })
           that.updateForm = res;
         })
@@ -404,7 +411,6 @@
     .status2{
       color: #FF4949;
     }
-    
   }
   .dialog{
     img{
@@ -431,6 +437,9 @@
     }
     .cell{
       padding: 0 10px;
+    }
+    .reality_stock{
+      color: #67C23A;
     }
   }
 </style>

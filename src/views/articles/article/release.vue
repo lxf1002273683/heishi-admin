@@ -347,6 +347,7 @@
     that.skuList = [];
     that.spuOptions = '';
     that.spuItems = [];
+    that.status = 0;
   }
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>

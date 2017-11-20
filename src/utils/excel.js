@@ -43,6 +43,32 @@ function formatJSON(orders) {
   return arr;
 }
 
+function formatJSON_hk(orders) {
+  const arr = [];
+  orders.forEach((item, index) => {
+      item.subinvoices.forEach((n, i) => {
+        const obj = {"收货人": null, '收货电话': null, '省': null, '市': null, '区': null, '详细地址': null,
+        '文章/类型': null, '商品名称': null, 'sku': null, '数量': null, '备注': null, '订单号': null};
+        if (i === 0) {
+          obj['收货人'] = item.receiver_name;
+          obj['收货电话'] = item.receiver_telphone;
+          obj['省'] = item.receiver_address_province;
+          obj['市'] = item.receiver_address_city;
+          obj['区'] = item.receiver_address_district;
+          obj['详细地址'] = item.receiver_address_description;
+          obj['备注'] = item.memo;
+        }
+        obj['订单号'] = n.order_number;
+        obj['文章/类型'] = n.object_title + n.object_type_desc;
+        obj['商品名称'] = n.sku.spu.name;
+        obj['sku'] = n.sku.type;
+        obj['数量'] = n.quantity;
+        arr.push(obj);
+      })
+  })
+  return arr;
+}
+
 function s2ab(s) {
   if (typeof ArrayBuffer !== 'undefined') {
     var buf = new ArrayBuffer(s.length);
@@ -68,6 +94,27 @@ function saveAs(obj, fileName) {
 
 export function downloadExl(orders, name) {
   const data = formatJSON(orders);
+  const wopts = {
+    bookType: 'xls',
+    bookSST: false,
+    type: 'binary'
+  };
+  const wb = {
+    SheetNames: ['Sheet1'],
+    Sheets: {},
+    Props: {}
+  };
+  // 获取当前日期
+  const date = new Date();
+  const strDate = name + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+  wb.Sheets.Sheet1 = XLSX.utils.json_to_sheet(data);
+  saveAs(new Blob([s2ab(XLSX.write(wb, wopts))], {
+    type: 'application/octet-stream'
+  }), strDate + '.xls');
+}
+
+export function downloadExl_hk(orders, name) {
+  const data = formatJSON_hk(orders);
   const wopts = {
     bookType: 'xls',
     bookSST: false,
