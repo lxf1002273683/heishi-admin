@@ -2,9 +2,13 @@
   <div class="app-container">
     <div class="tableData" v-if="activeIndex == '/admin/users'">
       <el-table :data="tableData" style="width: 100%" stripe border v-loading.body="listLoading" element-loading-text="拼命加载中">
+        <el-table-column prop="id" label="ID" width="60">
+        </el-table-column>
         <el-table-column prop="account" label="用户名">
         </el-table-column>
-        <el-table-column prop="avatar" label="头像">
+        <el-table-column prop="nickname" label="昵称">
+        </el-table-column>
+        <el-table-column prop="email" label="email">
         </el-table-column>
         <el-table-column prop="role" label="角色">
           <template scope="scope">

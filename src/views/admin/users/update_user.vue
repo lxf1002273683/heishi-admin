@@ -1,6 +1,6 @@
 <template>
     <div class="app-container">
-      <el-form autoComplete="on" ref="addForm" :model="addForm" label-width="80px" class="addform">
+      <el-form autoComplete="on" ref="addForm" :model="addForm" label-width="120px" class="addform">
           <el-form-item label="用户名">
             <el-select class="select" v-model="userid" filterable remote placeholder="请输入修改用户" :remote-method="remoteMethod" :loading="loading">
               <el-option v-for="item in users" :key="item.value" :label="item.account" :value="item.id"></el-option>
