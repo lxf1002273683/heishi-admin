@@ -201,13 +201,13 @@
       openDialog(id, index) {
         const that = this;
         this.dialogStatus = true;
+        this.replyid = id;
         history_comment(id).then((res) => {
           that.comment_list = res;
           // 获取 买家向卖家的对话id
           res.forEach((item, i) => {
             if(item.to_uid == that.seller_id){
               that.replyUserName = res[i]['from_nickname'];
-              that.replyid = res[i]['id'];
               return false;
             }
           })
@@ -218,11 +218,6 @@
         read_comment(obj).then((res) => {
           that.tableData[index].status = 0;
         })
-      },
-      // 展开回复
-      addReplyUser(from_nickname, id) {
-        this.replyUserName = from_nickname;
-        this.replyid = id;
       },
       // 回复
       replyUser(){

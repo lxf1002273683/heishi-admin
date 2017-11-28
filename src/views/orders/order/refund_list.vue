@@ -181,7 +181,8 @@
         const params = {
           size: 20,
           uid: this.hs_id,
-          role: 4
+          role: 4,
+          status: this.selectInput
         }
         if(obj){
           Object.assign(params, obj)
@@ -210,7 +211,6 @@
         const obj = {
           page: val
         }
-        obj.status = this.selectInput
         // 搜索字段
         obj.keyword = this.keyword
         this.initOrderList(obj);
@@ -226,7 +226,6 @@
       // 筛选 
       selectChange() {
         const obj = {
-          status: this.selectInput,
           page: 1
         }
         this.initOrderList(obj);

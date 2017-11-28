@@ -90,7 +90,7 @@
                   <el-input placeholder="价格" size="mini" v-model="scope.row.price"></el-input>
                 </template>
               </el-table-column>
-              <el-table-column label="库存" width="140">
+              <el-table-column label="库存" width="120">
                 <template scope="scope">
                   <el-input placeholder="库存" size="mini" v-model="scope.row.quantity"></el-input>
                 </template>
@@ -100,7 +100,7 @@
                   <el-input placeholder="邮费" size="mini" v-model="scope.row.postage"></el-input>
                 </template>
               </el-table-column>
-              <el-table-column label="SKU" prop="id" width="70">
+              <el-table-column label="商品查询" prop="id" width="80">
               </el-table-column>
               </el-table-column>
               <el-table-column label="操作" width="130">
