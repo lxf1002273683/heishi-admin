@@ -53,9 +53,9 @@
               });
               // 重置
               this.$refs.addForm.resetFields();
-            }).catch(function(err){
+            }).catch((error) => {
               that.$message({
-                message: '创建失败，请查看模块是否已存在',
+                message: error.message,
                 type: 'error'
               });
             })
