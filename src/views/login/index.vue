@@ -38,8 +38,8 @@
         };
         return {
           loginForm: {
-            account: 'admin',
-            password: '123456'
+            account: '',
+            password: ''
           },
           // form验证规则
           loginRules: {

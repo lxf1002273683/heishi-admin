@@ -174,9 +174,11 @@
         comment_list(params).then((res) => {
           that.tableData = res.result;
           that.totalPages = res.totalPages*10;
-          // 获取黑市卖家id
-          that.seller_id = res.result[0].to_uid;
           that.listLoading = false;
+          // 获取黑市卖家id
+          if(res.result.length > 0){
+            that.seller_id = res.result[0].to_uid;
+          }
         })
       },
       //分页
