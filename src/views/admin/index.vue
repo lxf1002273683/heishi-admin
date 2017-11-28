@@ -25,16 +25,16 @@
   import { update_password } from '@/api/admin';
   export default {
     data() {
-      const validatePass = (rule, value, callback) =>{
-        if(this.form.password_new != this.form.password_confirmed){
+      const validatePass = (rule, value, callback) => {
+        if (this.form.password_new !== this.form.password_confirmed) {
           callback(new Error('两次输入的密码不正确'));
-        }else{
+        } else {
           callback();
         }
       }
       return {
         activeNames: ['1'],
-        form:{
+        form: {
           password: null,
           password_new: null,
           password_confirmed: null
@@ -42,7 +42,7 @@
         loginRules: {
           password: { required: true, message: '请输入当前密码', trigger: 'blur' },
           password_new: { required: true, message: '请输入新密码', trigger: 'blur' },
-          password_confirmed: { required: true, message: '请再次输入新密码', trigger: 'blur' }
+          password_confirmed: { validator: validatePass, required: true, trigger: 'blur' }
         }
       }
     },
@@ -55,9 +55,9 @@
               this.$store.dispatch('FedLogOut').then(() => {
                 location.reload();
               });
-            },(error) => {
+            }, (error) => {
               that.$message({
-                message: '修改失败，请密码确认是否正确',
+                message: error.message,
                 type: 'error'
               })
             })
