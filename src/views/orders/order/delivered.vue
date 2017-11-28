@@ -80,7 +80,7 @@
           <template scope="scope">
             <div class="content-rowspan" >
               <div v-for="(item, index) in scope.row.goods" class="refund_status">
-                <span class="status1" v-if="item.tag == 0">无</span>
+                <span class="status1" v-if="item.tag == 0 && item.process_status != 26">无</span>
                 <span class="status2" v-if="item.tag == 2">已拒绝</span>
                 <span class="status3" v-if="item.tag == 1 && item.process_status != 26" @click="refund_info(item.order_number,item.process_status)">同意退款</span>
                 <span class="status3" v-if="item.process_status == 26" @click="refund_info(item.order_number,item.process_status)">完成退款</span>

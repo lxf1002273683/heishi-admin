@@ -89,7 +89,7 @@
         that.listLoading = true;
         order_list(params).then((res) => {
           that.tableData = res.orders;
-          that.totalPages = res.totalPages*10;
+          that.totalPages = res.totalPages * 10;
           that.listLoading = false;
         })
       },
