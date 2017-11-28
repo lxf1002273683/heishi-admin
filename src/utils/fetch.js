@@ -59,7 +59,7 @@ service.interceptors.response.use(
       // that falls out of the range of 2xx
       switch (error.response.status) {
         // token过期
-        case 401:
+        case 400:
           Message({
             message: '登录过期，请重新登录',
             type: 'error',

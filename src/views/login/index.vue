@@ -44,7 +44,7 @@
           // form验证规则
           loginRules: {
             account: [
-                { required: true, trigger: 'blur'}
+                { required: true, trigger: 'blur' }
             ],
             password: [
                 { required: true, trigger: 'blur', validator: validatePass }
