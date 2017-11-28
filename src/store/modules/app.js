@@ -6,7 +6,7 @@ const app = {
     sidebar: {
       opened: !+Cookies.get('sidebarStatus')  // + 转换数据格式 因为字符串的0为真
     },
-    hosts: process.env.BASE_API
+    hosts: window.heikuConfig.url
   },
   mutations: {
     TOGGLE_SIDEBAR: state => {
