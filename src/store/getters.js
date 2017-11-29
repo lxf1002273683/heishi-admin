@@ -8,7 +8,8 @@ const getters = {
   name: state => state.user.name,		// 用户名称
   roles: state => state.user.roles,		// 角色列表--管理权限
   permission_routers: state => state.permission.routers, // 用户可用的路由，用来配置侧边栏
-  addRouters: state => state.permission.addRouters,		 // 通过权限过滤后的路由，在main中配置
+  addRouters: state => state.permission.addRouters,    // 通过权限过滤后的路由，在main中配置
+  modules: state => state.permission.modules,		 // 管理员，大帐号可给业务帐号配置的模块
   routerPath: state => state.router.path		 // 通过权限过滤后的路由，在main中配置
 };
 export default getters

@@ -2,9 +2,9 @@
     <div class="app-container">
 <!-- 管理员给业务帐号配置权限  此业务帐号必须是管理员创建-->
       <div class="privilege">
-        <span class="title">业务帐号配置权限</span>
+        <span class="title">配置权限</span>
         <el-form label-width="80px" :model="privilege" ref="privilege" >
-          <el-form-item label="选择用户" prop="shop_id">
+          <el-form-item label="业务帐号" prop="shop_id">
             <el-select v-model="shopDefault" filterable placeholder="请选择" @change="selectChange" class="select_shop_id">
               <el-option v-for="item in userOptions" :key="item.id" :label="item.account" :value="item.id"></el-option>
             </el-select>
@@ -12,7 +12,7 @@
           <div class="modules">选择模块</div>
           <el-checkbox-group v-model="checkList" @change="handleCheckedCitiesChange" class="modules_list">
             <template v-for="item in checkDate">
-              <el-checkbox :label="item.id" v-if="item.privilege == 4 || item.privilege == 8 || item.privilege == 256">{{item.name}}</el-checkbox>
+              <el-checkbox :label="item.id">{{item.name}}</el-checkbox>
             </template>
           </el-checkbox-group>
           <el-form-item class="el-btn">
@@ -22,17 +22,17 @@
       </div>
 <!-- 管理员给大帐号分配假帐号大卖家-->
       <div class="relevanceUser">
-        <span class="title">假帐号，大卖家关联大帐号</span>
+        <span class="title">关联帐号</span>
         <el-form label-width="80px" >
-          <el-form-item label="大帐号" prop="shop_id">
+          <el-form-item label="管理帐号" prop="shop_id">
             <el-select v-model="parentsDefault" filterable placeholder="请选择" @change="selectChangeParents" class="select_shop_id">
               <el-option v-for="item in parents" :key="item.id" :label="item.account" :value="item.id"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="子帐号" prop="shop_id">
             <el-select v-model="childrenDefault" filterable placeholder="请选择" @change="selectChangeChildren" class="select_shop_id">
-              <!-- 过滤已经有父级的帐号  -->
-              <el-option v-for="item in children" :key="item.id" :label="item.account" :value="item.id" v-if="!item.parent_id"></el-option>
+              <!-- 过滤已经有父级的帐号 同一个子帐号只能对应一个管理帐号，再次关联时会覆盖上一个 -->
+              <el-option v-for="item in children" :key="item.id" :label="item.account" :value="item.id"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item class="el-btn">
@@ -67,10 +67,10 @@
       }
     },
     created() {
-      // 获取业务帐号列表
-      this.getUsersList();
       // 获取模块列表
       this.getModuleList();
+      // 获取业务帐号列表
+      this.getUsersList();
       // 获取大帐号列表
       this.getParentsList();
       // 获取子帐号(假帐号，大卖家)列表
@@ -110,6 +110,7 @@
         this.privilege.modules = arr;
       },
       getUsersList() {
+        // 当前获取100条，后期增加全部参数
         const that = this;
         const obj = {
           role: 4,
@@ -122,11 +123,18 @@
       },
       getModuleList() {
         const that = this
+        // 获取可给业务帐号配置的模块
+        const modules = this.$store.getters.modules
         modules_list().then((res) => {
-          that.checkDate = res;
+          // 对数组进行过滤
+          const arr = res.filter(item => {
+            return modules.some(module => module === item.privilege)
+          })
+          that.checkDate = arr;
         })
       },
       getParentsList() {
+        // 当前获取100条，后期增加全部参数
         const that = this;
         const obj = {
           role: 1,
@@ -137,6 +145,7 @@
         })
       },
       getChildrenList() {
+        // 当前获取100条，后期增加全部参数
         const that = this;
         const obj2 = {
           role: 2,
@@ -183,11 +192,16 @@
   }
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>
+.app-container{
+  max-width: 800px;
   .relevanceUser,
   .privilege{
+    float: left;
+    margin-right: 50px;
     .title{
       margin: 20px;
       display: block;
+      font-size: 14px;
     }
     .el-btn{
       margin-top: 20px;
@@ -208,4 +222,8 @@
       line-height: 36px;
     }
   }
+  .relevanceUser{
+    float: right;
+  }
+}
 </style>

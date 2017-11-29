@@ -3,7 +3,7 @@
   <div class="app-container">
     <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="select">
       <el-menu-item index="1">用户列表</el-menu-item>
-      <el-menu-item index="2">创建用户</el-menu-item>
+      <el-menu-item index="2">创建业务帐号</el-menu-item>
     </el-menu>
     <div class="user_content">
       <template v-if="activeIndex == 1"><Users></Users></template>

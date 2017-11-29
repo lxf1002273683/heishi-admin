@@ -15,9 +15,9 @@
           <el-form-item label="手机号码" prop="phone">
               <el-input v-model="addForm.phone" autoComplete="on"></el-input>
           </el-form-item>
-          <el-form-item label="上级用户ID" prop="parent_id">
+          <!-- <el-form-item label="上级用户ID" prop="parent_id">
               <el-input v-model="addForm.parent_id" autoComplete="on"></el-input>
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item label="黑市用户ID" prop="hs_user_id">
               <el-input v-model="addForm.hs_user_id" autoComplete="on"></el-input>
           </el-form-item>
