@@ -95,7 +95,11 @@ export const asyncRouterMap = [
     component: Layout,
     redirect: 'noredirect',
     name: '管理配置',
-    meta: { role: [1] },
+    meta: {
+      role: [1],
+      authority: 'admin',
+      status: false
+    },
     children: [
       { path: 'users', component: UsersTpl, name: '用户列表' },
       { path: 'modules', component: ModulesTpl, name: '模块列表' },
@@ -108,7 +112,11 @@ export const asyncRouterMap = [
     component: Layout,
     redirect: 'noredirect',
     name: '业务管理',
-    meta: { role: [2] },
+    meta: {
+      role: [2],
+      authority: 'users',
+      status: false
+    },
     children: [
       { path: 'users', component: BusinessUsersTpl, name: '帐号管理' },
       { path: 'module_privilege', component: BusinessModules, name: '权限配置' }
@@ -120,10 +128,13 @@ export const asyncRouterMap = [
     component: Layout,
     redirect: 'noredirect',
     name: '商品管理',
-    meta: { role: [4] },
+    meta: {
+      role: [4],
+      authority: 'admin',
+      status: true
+    },
     children: [
       { path: 'spus', component: SpusTpl, name: 'SPU列表' },
-      // { path: 'skus', component: Skus, name: 'SKU列表' },
       { path: 'requests', component: RequestTpl, name: '入库申请' }
     ]
   },
@@ -133,7 +144,11 @@ export const asyncRouterMap = [
     component: Layout,
     redirect: 'noredirect',
     name: '库房管理',
-    meta: { role: [8] },
+    meta: {
+      role: [8],
+      authority: 'admin',
+      status: true
+    },
     children: [
       { path: 'warehouses', component: WarehousesTpl, name: '仓库管理' }
     ]
@@ -144,7 +159,11 @@ export const asyncRouterMap = [
     component: Layout,
     redirect: 'noredirect',
     name: '财务管理',
-    meta: { role: [256] },
+    meta: {
+      role: [256],
+      authority: 'admin',
+      status: true
+    },
     children: [
       { path: 'finance', component: FinanceTpl, name: '审核列表' }
     ]
@@ -167,7 +186,11 @@ export function modulesConfig(userIds) {
     component: Layout,
     redirect: 'noredirect',
     name: '我的商品',
-    meta: { role: [16] },
+    meta: {
+      role: [16],
+      authority: 'users',
+      status: true
+    },
     children: []
   }
   // 我的评论
@@ -176,7 +199,11 @@ export function modulesConfig(userIds) {
     component: Layout,
     redirect: 'noredirect',
     name: '我的评论',
-    meta: { role: [32] },
+    meta: {
+      role: [32],
+      authority: 'users',
+      status: true
+    },
     children: []
   }
   // 我的订单
@@ -185,7 +212,11 @@ export function modulesConfig(userIds) {
     component: Layout,
     redirect: 'noredirect',
     name: '我的订单',
-    meta: { role: [64] },
+    meta: {
+      role: [64],
+      authority: 'users',
+      status: true
+    },
     children: []
   }
   // 我的帐户
@@ -194,7 +225,11 @@ export function modulesConfig(userIds) {
     component: Layout,
     redirect: 'noredirect',
     name: '我的帐户',
-    meta: { role: [128] },
+    meta: {
+      role: [128],
+      authority: 'users',
+      status: true
+    },
     children: []
   }
   for (let x = 0; x < userIds.length; x++) {

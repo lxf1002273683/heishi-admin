@@ -6,21 +6,21 @@
             <el-select v-model="shopDefault" filterable placeholder="请选择" @change="selectChange" class="select_shop_id">
               <el-option v-if="item.role == 4" v-for="item in userOptions" :key="item.id" :label="item.account" :value="item.id"></el-option>
             </el-select>
-            <span style="color: red">此大帐号下的业务账号</span>
+            <!-- <span style="color: red">此大帐号下的业务账号</span> -->
           </el-form-item>
           <el-checkbox-group v-model="checkUserList" @change="userCheckedCitiesChange" class="modules_list">
-            <div class="modules">选择帐号</div>
+            <div class="modules">选择卖家</div>
             <template v-for="item in checkUserDate">
               <!-- 只显示大帐号中的业务模块 -->
               <el-checkbox :label="item.id" v-if="item.role != 4">{{item.account}}</el-checkbox>
             </template>
-            <span style="color: red;font-size: 14px;">此大帐号下的假帐号，大卖家</span>
+            <!-- <span style="color: red;font-size: 14px;">此大帐号下的假帐号，大卖家</span> -->
           </el-checkbox-group>
           <el-checkbox-group v-model="checkList" @change="moduleCheckedCitiesChange" class="modules_list">
             <div class="modules">选择模块</div>
             <template v-for="item in checkDate">
               <!-- 只显示大帐号中的业务模块 -->
-              <el-checkbox :label="item.id" v-if="item.privilege != 2 && item.privilege != 4 && item.privilege != 8 && item.privilege != 256">{{item.name}}</el-checkbox>
+              <el-checkbox :label="item.id">{{item.name}}</el-checkbox>
             </template>
           </el-checkbox-group>
           <el-form-item class="el-btn">
@@ -73,7 +73,7 @@
             this.addForm.users = [];
             this.addForm.owners = [];
           })
-        }else{
+        } else {
           this.$message({
             message: '请选择用户以及模块',
             type: 'error'
@@ -111,8 +111,14 @@
       },
       getModuleList() {
         const that = this
+        // 获取可给业务帐号配置的模块
+        const modules = this.$store.getters.modules
         modules_list().then((res) => {
-          that.checkDate = res;
+          // 对数组进行过滤
+          const arr = res.filter(item => {
+            return modules.some(module => module === item.privilege)
+          })
+          that.checkDate = arr;
         })
       }
     }
