@@ -57,9 +57,10 @@
         <div class="replyBox">
           <el-select v-model="replyInput" placeholder="请选择" class="searchInput">
             <el-option :label="'文字回复  '+replyUserName" value="1"></el-option>
-            <el-option :label="'图片回复  '+replyUserName" value="2"></el-option>
+            <!-- <el-option :label="'图片回复  '+replyUserName" value="2"></el-option> -->
           </el-select>
           <el-select v-model="quickphrasesInput" placeholder="请选择" class="searchInput" @change="phrasesChange" v-if="replyInput == 1">
+            <el-option label="默认" value=""></el-option>
             <template v-for="item in quickphrases_list">
               <el-option :label="item.content" :value="item.content"></el-option>
             </template>
