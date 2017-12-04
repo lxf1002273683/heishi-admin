@@ -1,6 +1,7 @@
 <!-- 用户首页 -->
 <template>
   <div class="home">
+    <div class="versions">当前版本 v1.0.1</div>
     <el-collapse v-model="activeNames">
       <el-collapse-item title="修改密码" name="1">
         <el-form ref="form" :model="form"  autoComplete="on"  label-width="80px" :rules="loginRules">
@@ -73,6 +74,10 @@
     .el-form{
       width: 50%;
       min-width: 300px;
+    }
+    .versions{
+      font-size: 16px;
+      padding: 10px;
     }
   }
 </style>
