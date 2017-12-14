@@ -21,9 +21,9 @@
           <el-form-item label="黑市用户ID" prop="hs_user_id">
               <el-input v-model="addForm.hs_user_id" autoComplete="on"></el-input>
           </el-form-item>
-          <!-- <el-form-item label="密码" prop="password">
+          <el-form-item label="密码" prop="password">
               <el-input v-model="addForm.password" autoComplete="on"></el-input>
-          </el-form-item> -->
+          </el-form-item>
           <el-form-item>
               <el-button type="primary" @click="onSubmit">立即修改</el-button>
           </el-form-item>
