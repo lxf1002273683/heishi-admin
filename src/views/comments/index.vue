@@ -106,7 +106,7 @@
 </template>
 
 <script>
-  import { comment_list, history_comment, reply_comment, delete_comment, read_comment, quickphrases_query, query_goods } from '@/api/comment';
+  import { comment_list, history_comment, reply_comment, read_comment, quickphrases_query } from '@/api/comment';
   import { getToken } from '@/utils/auth';
   import OrdersList from './query_orders';
   import Goods from './query_goods';
